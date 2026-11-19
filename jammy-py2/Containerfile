@@ -1,0 +1,64 @@
+# TinyOS 2.1.2 + TOSSIM toolchain on Ubuntu 22.04 (jammy), 64-bit, Python 2.7.
+#
+# Builds `make micaz sim` and `make micaz sim-sf` without changing any TinyOS file:
+# every fix below is a toolchain choice. See README.md ("The eight fixes") for why.
+#
+#   podman build -t tinyos-toolchain:2.1.2-jammy-py2 -f jammy-py2/Containerfile .
+FROM docker.io/library/ubuntu:22.04
+
+ARG NESC_TAG=v1.4.0
+ARG NESC_SHA256=ea9a505d55e122bf413dff404bebfa869a8f0dd76a01a8efc7b4919c375ca000
+ARG TINYOS_TAG=release_tinyos_2_1_2
+ARG TINYOS_SHA256=5d31f5bf27030238cbb1834ed0f9030d3cacadc4f6a75f2914ea36c69eb18759
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Fix 2 (JDK: the tools' configure requires java), fix 3 (avr-gcc: mig calls it even for
+# the simulator), fix 4 (emacs/bison/flex/gperf: building nesC from git generates code with
+# them), fix 6 (gcc-10).
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+      ca-certificates curl make perl autoconf automake libtool \
+      gcc g++ gcc-10 g++-10 \
+      python2.7 python2.7-dev \
+      openjdk-11-jdk-headless \
+      gcc-avr avr-libc \
+      bison flex gperf emacs-nox \
+ && rm -rf /var/lib/apt/lists/*
+
+# Fix 1: the tools' configure looks for `python`/`python2`.
+RUN ln -sf /usr/bin/python2.7 /usr/bin/python2 && ln -sf /usr/bin/python2.7 /usr/bin/python
+
+# Fix 4: nesC 1.4.0 from the official repo (the 1.3.5 package dies with "nesC: Internal error").
+# No "make -j": the emacs code generation races on its own output files in parallel.
+RUN curl -fsSL -o /tmp/nesc.tar.gz https://codeload.github.com/tinyos/nesc/tar.gz/refs/tags/${NESC_TAG} \
+ && echo "${NESC_SHA256}  /tmp/nesc.tar.gz" | sha256sum -c - \
+ && mkdir /tmp/nesc && tar -xzf /tmp/nesc.tar.gz -C /tmp/nesc --strip-components=1 \
+ && cd /tmp/nesc && ./Bootstrap && ./configure --prefix=/usr/local && make && make install \
+ && rm -rf /tmp/nesc /tmp/nesc.tar.gz
+
+# TinyOS 2.1.2 from the official repo, at the release tag (same version as the TOSSIM build
+# this replaces), plus the tools the make system needs (ncc, mig, ncg, tos-ident-flags).
+ENV TOSROOT=/opt/tinyos-2.1.2
+RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/tinyos/tinyos-main/tar.gz/refs/tags/${TINYOS_TAG} \
+ && echo "${TINYOS_SHA256}  /tmp/tinyos.tar.gz" | sha256sum -c - \
+ && mkdir -p ${TOSROOT} && tar -xzf /tmp/tinyos.tar.gz -C ${TOSROOT} --strip-components=1 \
+ && rm /tmp/tinyos.tar.gz \
+ && cd ${TOSROOT}/tools && ./Bootstrap && ./configure --prefix=/usr/local \
+ && for d in tinyos/ncc tinyos/misc; do make -C $d && make -C $d install || exit 1; done
+
+# Fix 6: gcc 11 + glibc 2.35 break on __attr_dealloc(fclose) in the C that nesC generates.
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+
+# Fix 7: sim.extra parses "Python 2.7.18" as "2.78" (its sed expects a one-digit patch).
+# Fix 5: nesC does not know glibc's _FloatN types; map them for the nesC step only (PFLAGS
+# reaches ncc, not g++). Fix 8: TinyOS relies on gnu89 inline semantics.
+# The single quotes stay in the PFLAGS value on purpose: make hands it to the shell as is.
+ENV TOSDIR=${TOSROOT}/tos \
+    MAKERULES=${TOSROOT}/support/make/Makerules \
+    CLASSPATH=. \
+    PYTHONPATH=${TOSROOT}/support/sdk/python \
+    PYTHON_VERSION=2.7 \
+    PFLAGS="-fgnu89-inline -D_Float32=float -D_Float64=double -D_Float32x=double -D_Float64x='long double' -D_Float128='long double'"
+
+WORKDIR /work

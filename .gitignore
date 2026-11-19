@@ -1,0 +1,6 @@
+*.log
+build/
+simbuild/
+_TOSSIMmodule.so
+TOSSIM.py
+*.pyc
