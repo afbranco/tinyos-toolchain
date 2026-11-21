@@ -14,8 +14,10 @@ depends on Terra: the tests use stock TinyOS apps.
 - **Supported: TOSSIM** (`make micaz sim` and `make micaz sim-sf`), which is what Terra needs.
   This is what the images build and the tests check.
 - **Time-boxed: AVR motes** (micaz, iris, mica2). `resolute-py3` builds them (fixes 12, 13
-  and one upstream TinyOS commit); not yet run on a mote or on the Avrora simulator. It stays
-  only if each fix stays small; otherwise it is dropped and the reason written here.
+  and one upstream TinyOS commit), and the micaz firmware runs on the
+  [Avrora](https://sourceforge.net/projects/avrora/) simulator in the tests. Not yet tried on a
+  real mote. It stays only if each fix stays small; otherwise it is dropped and the reason
+  written here.
 - **Out of scope:** the other TinyOS 2.1.2 platforms (MSP430, ARM, XScale, M16C). Their old
   compilers are gone (for MSP430, TI's current `msp430-elf` GCC is not compatible with the
   mspgcc TinyOS was written for), so supporting them means porting TinyOS, not building it.
@@ -24,7 +26,7 @@ depends on Terra: the tests use stock TinyOS apps.
 
 | Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | `make micaz` / `iris` / `mica2` | |
 |---|---|---|---|---|---|---|
-| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | ✅ (build only) | **maintained** |
+| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | ✅ (micaz also on Avrora) | **maintained** |
 | `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ | | frozen |
 
 `resolute-py3` (Ubuntu 26.04 LTS, supported until 2031) is the one image that gets new work.
@@ -92,6 +94,14 @@ The `x86_64-linux-gnu-gcc` used by Python extension builds is not affected by th
 | 12 | `` `ASSR' undeclared ``, `WDT`, `RAMPZ`… (registers missing) | since avr-gcc 5 the driver reads a per-device specs file and gives the compiler (here nesC) `-mmcu=avr51` instead of `-mmcu=atmega128`; nesC reads the predefined macros for that architecture, so `__AVR_ATmega128__` & co. are missing and `<avr/io.h>` selects no device | an `avr-gcc` wrapper (`resolute-py3/avr-gcc`, as `/usr/local/bin/avr-gcc`): for nesC's call only, it passes the macros that `-mmcu=<device>` defines and its architecture does not (for atmega128: `__AVR_ATmega128__`, `__AVR_DEVICE_NAME__`, `__AVR_RODATA_IN_RAM__`) |
 | 13 | `syntax error before 'pgm_read_i24'` in `avr/pgmspace.h` | avr-gcc 14 defines `__INT24_MAX__`, and avr-libc then declares functions on `__int24`, a type nesC does not know | the same wrapper undefines `__INT24_MAX__` for nesC (TinyOS does not use those functions) |
 | – | `must be const in order to be put into read-only section by means of '__attribute__((progmem))'` | TinyOS 2.1.2's `PROGMEM` typedefs drop `const`, which newer GCCs require | upstream commit [`cbbddf66`](https://github.com/tinyos/tinyos-main/commit/cbbddf66ee8acbbc87fe316e7077cc1144968d88) (2014), cherry-picked into the fork |
+
+The image also has **Avrora** 1.7.117 (2013, BSD; `avrora` command), an AVR simulator for micaz
+and mica2, run on **JDK 17**: Avrora uses `java.lang.Compiler`, which Java 21 removed. Example:
+
+```bash
+avrora -platform=micaz -input=elf -seconds=4 -monitors=leds build/micaz/main.exe
+avrora -simulation=sensor-network -platform=micaz -input=elf -nodecount=2 -seconds=3 -monitors=packet build/micaz/main.exe
+```
 
 `cbbddf66` also edits `tos/chips/atm128/sim/atm128const.h`, which TOSSIM includes: the
 generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
@@ -171,6 +181,12 @@ apps and runs them:
   references match in both images: the official TinyOS (`jammy-py2`, GCC 10) and the
   `2.1.2-maintained` fork with GCC 15 (`resolute-py3`) generate the same code. After an intended
   change, regenerate the references with `GEN_C_UPDATE=<writable dir>` and commit them with it.
+- **AVR** (`resolute-py3` only): Blink and RadioCountToLeds built for micaz, iris and mica2,
+  each with its generated-C reference. Then, on Avrora (`tests/avrora_check.py`): Blink on a
+  micaz for 4 s, whose three LEDs must toggle exactly every 1800000, 3600000 and 7200000
+  cycles (250, 500 and 1000 TinyOS ms at 7.3728 MHz); and RadioCountToLeds on 2 micaz for
+  3 s, each receiving at least 5 packets with no corrupted byte. Both checks were seen to
+  fail with Blink's timer at 251 ms and with RadioCountToLeds not sending.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit
 build. Equivalence needs a trace comparison against the original toolchain (see Roadmap).
@@ -185,5 +201,5 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 1. ~~**Python 3**~~: done (see "Python 3").
 2. ~~**A current Ubuntu**~~: done in `resolute-py3` (26.04 LTS).
-3. **AVR motes** (see "Scope").
+3. ~~**AVR motes**~~: build and Avrora (see "Scope"); a real mote is still to be tried.
 4. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.

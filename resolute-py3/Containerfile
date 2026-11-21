@@ -13,12 +13,13 @@ ARG NESC_SHA256=ea9a505d55e122bf413dff404bebfa869a8f0dd76a01a8efc7b4919c375ca000
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Fix 1 (python-is-python3: the tools' configure looks for `python`), fix 2 (JDK), fix 3
-# (avr-gcc), fix 4 (emacs/bison/flex/gperf for nesC from git).
+# (avr-gcc), fix 4 (emacs/bison/flex/gperf for nesC from git). JDK 17, not 21: Avrora (2013)
+# uses java.lang.Compiler, which Java 21 removed.
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       ca-certificates curl make perl autoconf automake libtool \
       gcc g++ \
       python3 python3-dev python-is-python3 \
-      openjdk-21-jdk-headless \
+      openjdk-17-jdk-headless \
       gcc-avr avr-libc \
       bison flex gperf emacs-nox \
  && rm -rf /var/lib/apt/lists/*
@@ -46,6 +47,15 @@ RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/
  && rm /tmp/tinyos.tar.gz \
  && cd ${TOSROOT}/tools && ./Bootstrap && ./configure --prefix=/usr/local \
  && for d in tinyos/ncc tinyos/misc; do make -C $d && make -C $d install || exit 1; done
+
+# Avrora, the AVR simulator (micaz, mica2), to run the firmware without a mote. BSD license.
+ARG AVRORA_VERSION=1.7.117
+ARG AVRORA_SHA256=fd72eb0a23377550bb48d8f0f84cec218a02fd769ac586999c57f52ae219c060
+RUN curl -fsSL --retry 5 --retry-all-errors --connect-timeout 30 -o /opt/avrora.jar \
+      https://downloads.sourceforge.net/project/avrora/avrora-beta-${AVRORA_VERSION}.jar \
+ && echo "${AVRORA_SHA256}  /opt/avrora.jar" | sha256sum -c - \
+ && printf '#!/bin/sh\nexec java -jar /opt/avrora.jar "$@"\n' > /usr/local/bin/avrora \
+ && chmod +x /usr/local/bin/avrora
 
 # Fixes 10 and 11: a gcc wrapper that sets the C dialect for TinyOS builds (see the file).
 # Fixes 12 and 13: an avr-gcc wrapper for nesC's AVR builds (see the file).

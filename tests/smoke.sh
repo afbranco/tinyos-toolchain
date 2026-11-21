@@ -4,7 +4,8 @@
 # Builds two stock TinyOS apps for TOSSIM and runs a short simulation of each, plus an API
 # check of the Python binding. Uses python$PYTHON_VERSION (set by the image: 2.7 or 3.x).
 # In images with AVR support (/usr/local/bin/avr-gcc), it also builds Blink and RadioCountToLeds
-# for micaz, iris and mica2 (compile only: no mote and no AVR simulator here).
+# for micaz, iris and mica2, and runs the micaz builds on the Avrora simulator (Blink's LED
+# periods; RadioCountToLeds on 2 nodes, packets received) when the image has `avrora`.
 # Each build's generated C (app.c, normalized by gen_c_norm.awk: TinyOS and app code only)
 # must match tests/ref/<app>-<target>.txt. To regenerate the references after an intended
 # change, mount a writable dir and set GEN_C_UPDATE to it.
@@ -69,6 +70,17 @@ if [ -x /usr/local/bin/avr-gcc ]; then
   for app in Blink RadioCountToLeds; do
     for plat in micaz iris mica2; do avr "$app" "$plat"; done
   done
+  if command -v avrora > /dev/null; then
+    echo "== Blink micaz on Avrora: 4 s"
+    avrora -platform=micaz -input=elf -seconds=4 -monitors=leds -colors=false \
+      "$work/avr-Blink-micaz/build/micaz/main.exe" > "$work/avrora-blink.txt" 2>&1
+    python3 /tests/avrora_check.py blink "$work/avrora-blink.txt" || fail=1
+    echo "== RadioCountToLeds micaz on Avrora: 2 nodes, 3 s"
+    avrora -simulation=sensor-network -platform=micaz -input=elf -nodecount=2 -seconds=3 \
+      -monitors=packet -colors=false "$work/avr-RadioCountToLeds-micaz/build/micaz/main.exe" \
+      > "$work/avrora-radio.txt" 2>&1
+    python3 /tests/avrora_check.py radio "$work/avrora-radio.txt" 5 || fail=1
+  fi
 else
   echo "== AVR: skipped (no AVR support in this image)"
 fi

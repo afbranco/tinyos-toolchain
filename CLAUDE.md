@@ -57,8 +57,10 @@ código em produção é anterior ao publicado.
 ## Próximo passo técnico
 
 AVR (2026-11-21): Blink e RadioCountToLeds compilam para micaz, iris e mica2 na `resolute-py3`
-(correções 12 e 13 no invólucro `resolute-py3/avr-gcc` + `cbbddf66` do oficial no fork). Falta
-rodar o firmware no **Avrora** (simulador AVR em Java) para provar que funciona sem mote.
+(correções 12 e 13 no invólucro `resolute-py3/avr-gcc` + `cbbddf66` do oficial no fork), e o
+micaz roda no **Avrora** 1.7.117 dentro do `smoke.sh` (JDK 17: o Avrora não roda no 21). O
+download do Avrora no SourceForge às vezes cai num espelho que não responde (o `--retry`
+resolve); se piorar, considerar guardar o jar no repositório (BSD, 1,6 MB). Falta: mote real.
 
 64 bits: a varredura de avisos do GCC nos builds TOSSIM não acha conversão ponteiro/inteiro.
 O Prof. lembrava de um problema de 64 bits identificado na VM do Terra, numa sessão TerraSim
