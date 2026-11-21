@@ -95,7 +95,8 @@ The `x86_64-linux-gnu-gcc` used by Python extension builds is not affected by th
 | 13 | `syntax error before 'pgm_read_i24'` in `avr/pgmspace.h` | avr-gcc 14 defines `__INT24_MAX__`, and avr-libc then declares functions on `__int24`, a type nesC does not know | the same wrapper undefines `__INT24_MAX__` for nesC (TinyOS does not use those functions) |
 | – | `must be const in order to be put into read-only section by means of '__attribute__((progmem))'` | TinyOS 2.1.2's `PROGMEM` typedefs drop `const`, which newer GCCs require | upstream commit [`cbbddf66`](https://github.com/tinyos/tinyos-main/commit/cbbddf66ee8acbbc87fe316e7077cc1144968d88) (2014), cherry-picked into the fork |
 
-The image also has **Avrora** 1.7.117 (2013, BSD; `avrora` command), an AVR simulator for micaz
+The image also has **Avrora** 1.7.117 (2013, BSD, vendored in `third_party/avrora`; `avrora`
+command), an AVR simulator for micaz
 and mica2, run on **JDK 17**: Avrora uses `java.lang.Compiler`, which Java 21 removed. Example:
 
 ```bash

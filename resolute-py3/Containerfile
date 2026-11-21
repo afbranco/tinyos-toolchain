@@ -49,11 +49,10 @@ RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/
  && for d in tinyos/ncc tinyos/misc; do make -C $d && make -C $d install || exit 1; done
 
 # Avrora, the AVR simulator (micaz, mica2), to run the firmware without a mote. BSD license.
-ARG AVRORA_VERSION=1.7.117
+# Vendored in third_party/avrora (SourceForge's mirrors are unreliable), checked by SHA-256.
 ARG AVRORA_SHA256=fd72eb0a23377550bb48d8f0f84cec218a02fd769ac586999c57f52ae219c060
-RUN curl -fsSL --retry 5 --retry-all-errors --connect-timeout 30 -o /opt/avrora.jar \
-      https://downloads.sourceforge.net/project/avrora/avrora-beta-${AVRORA_VERSION}.jar \
- && echo "${AVRORA_SHA256}  /opt/avrora.jar" | sha256sum -c - \
+COPY third_party/avrora/avrora-beta-1.7.117.jar /opt/avrora.jar
+RUN echo "${AVRORA_SHA256}  /opt/avrora.jar" | sha256sum -c - \
  && printf '#!/bin/sh\nexec java -jar /opt/avrora.jar "$@"\n' > /usr/local/bin/avrora \
  && chmod +x /usr/local/bin/avrora
 
