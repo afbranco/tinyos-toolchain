@@ -61,9 +61,10 @@ AVR (2026-11-21): Blink e RadioCountToLeds compilam para micaz, iris e mica2 na 
 rodar o firmware no **Avrora** (simulador AVR em Java) para provar que funciona sem mote.
 
 64 bits: a varredura de avisos do GCC nos builds TOSSIM não acha conversão ponteiro/inteiro.
-O Prof. lembra de um problema de 64 bits identificado na VM do Terra, numa sessão TerraSim
-anterior: perguntado à sessão TerraSim em 2026-11-21, resposta pendente. Os `.so` publicados do
-Terra são todos i386. Depois: oráculo de equivalência (fixar a semente com `randomSeed`).
+O Prof. lembrava de um problema de 64 bits identificado na VM do Terra, numa sessão TerraSim
+anterior. A sessão TerraSim (2026-11-21) não tem registro: buscou docs, memórias, git log e a
+transcrição; só consta que o `.so` é i386 e roda sob x86_64. Os `.so` publicados do Terra são
+todos i386. Origem do diagnóstico em aberto (perguntar ao Prof. onde ele viu). Depois: oráculo de equivalência (fixar a semente com `randomSeed`).
 
 ## Como trabalhar
 
