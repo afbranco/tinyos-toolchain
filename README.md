@@ -13,18 +13,19 @@ depends on Terra: the tests use stock TinyOS apps.
 
 - **Supported: TOSSIM** (`make micaz sim` and `make micaz sim-sf`), which is what Terra needs.
   This is what the images build and the tests check.
-- **Next, time-boxed: AVR motes** (micaz, iris, mica2), with the Avrora simulator as the test.
-  It stays only if each fix stays small; otherwise it is dropped and the reason written here.
+- **Time-boxed: AVR motes** (micaz, iris, mica2). `resolute-py3` builds them (fixes 12, 13
+  and one upstream TinyOS commit); not yet run on a mote or on the Avrora simulator. It stays
+  only if each fix stays small; otherwise it is dropped and the reason written here.
 - **Out of scope:** the other TinyOS 2.1.2 platforms (MSP430, ARM, XScale, M16C). Their old
   compilers are gone (for MSP430, TI's current `msp430-elf` GCC is not compatible with the
   mspgcc TinyOS was written for), so supporting them means porting TinyOS, not building it.
 
 ## Status
 
-| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | |
-|---|---|---|---|---|---|
-| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | **maintained** |
-| `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ | frozen |
+| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | `make micaz` / `iris` / `mica2` | |
+|---|---|---|---|---|---|---|
+| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | ✅ (build only) | **maintained** |
+| `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ | | frozen |
 
 `resolute-py3` (Ubuntu 26.04 LTS, supported until 2031) is the one image that gets new work.
 `jammy-py2` is **frozen**: kept, unchanged, as a bridge for Python 2 code and as the reference
@@ -48,8 +49,8 @@ podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-resolute-py3 make 
 Sources are fetched at fixed versions, checked by SHA-256:
 [tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0`, and TinyOS from
 [tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2`
-(`jammy-py2`) or from the `tossim-py3` branch of
-[afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/tossim-py3) (`*-py3`):
+(`jammy-py2`) or from the `2.1.2-maintained` branch of
+[afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained) (`*-py3`):
 the same tag plus one commit, described below. The official repositories are archived
 (read-only).
 
@@ -84,11 +85,33 @@ dialect (C23) is new to nesC. Still no TinyOS file is edited.
 
 The `x86_64-linux-gnu-gcc` used by Python extension builds is not affected by the wrapper.
 
+## AVR motes: two more fixes and one upstream commit
+
+| # | Symptom | Cause | Fix |
+|---|---|---|---|
+| 12 | `` `ASSR' undeclared ``, `WDT`, `RAMPZ`… (registers missing) | since avr-gcc 5 the driver reads a per-device specs file and gives the compiler (here nesC) `-mmcu=avr51` instead of `-mmcu=atmega128`; nesC reads the predefined macros for that architecture, so `__AVR_ATmega128__` & co. are missing and `<avr/io.h>` selects no device | an `avr-gcc` wrapper (`resolute-py3/avr-gcc`, as `/usr/local/bin/avr-gcc`): for nesC's call only, it passes the macros that `-mmcu=<device>` defines and its architecture does not (for atmega128: `__AVR_ATmega128__`, `__AVR_DEVICE_NAME__`, `__AVR_RODATA_IN_RAM__`) |
+| 13 | `syntax error before 'pgm_read_i24'` in `avr/pgmspace.h` | avr-gcc 14 defines `__INT24_MAX__`, and avr-libc then declares functions on `__int24`, a type nesC does not know | the same wrapper undefines `__INT24_MAX__` for nesC (TinyOS does not use those functions) |
+| – | `must be const in order to be put into read-only section by means of '__attribute__((progmem))'` | TinyOS 2.1.2's `PROGMEM` typedefs drop `const`, which newer GCCs require | upstream commit [`cbbddf66`](https://github.com/tinyos/tinyos-main/commit/cbbddf66ee8acbbc87fe316e7077cc1144968d88) (2014), cherry-picked into the fork |
+
+`cbbddf66` also edits `tos/chips/atm128/sim/atm128const.h`, which TOSSIM includes: the
+generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
+mote-only code: `McuSleepC`, the CC1000 radio).
+
+## TinyOS changes
+
+All on the [`2.1.2-maintained`](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained)
+branch of afbranco/tinyos-main, on top of `release_tinyos_2_1_2`, one commit per change:
+
+| Commit | What | Origin |
+|---|---|---|
+| `da2f9d0` | TOSSIM Python 3 bindings (SWIG 4), see "Python 3" | this project |
+| `fc2953f` | AVR progmem consts with newer GCC | upstream `cbbddf66`, cherry-picked (`-x`), author kept |
+
 ## Python 3
 
 Python 3 needs new TOSSIM bindings, so this is the one step that changes TinyOS. The change is a
 single commit on top of `release_tinyos_2_1_2`, on the
-[`tossim-py3`](https://github.com/afbranco/tinyos-main/tree/tossim-py3) branch of
+[`2.1.2-maintained`](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained) branch of
 afbranco/tinyos-main. The wrappers (`tossim_wrap.cxx`, `TOSSIM.py`, in `tos/lib/tossim` and
 `tos/lib/tossim/sf`) are regenerated with **SWIG 4.0.2** and committed, so the image does not
 need SWIG. The same sources still build for Python 2.7 (the tests pass on both).
@@ -108,11 +131,22 @@ What changes for a user of the Python API:
   `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
   a hand-written variable list.
 
+## 64-bit hosts
+
+TOSSIM compiles the mote code for the host, so type sizes change: `int` is 16 bits on a micaz
+and 32 in TOSSIM (as it always was), and on x86_64 `long` and pointers become 64 bits (32 on
+the old i386 builds). Code that keeps a pointer in an integer, or relies on a 32-bit `long`,
+can break. For the stock apps here, GCC reports **no pointer/integer size conversion** in the
+TOSSIM builds (nesC's C and the C++ TOSSIM library). Application code (e.g. the Terra VM)
+has to be checked on its own, and the equivalence oracle (see Roadmap) is the final test.
+
 ## Known issues (also in the original TinyOS 2.1.2)
 
 - **`removeChannel()` does nothing.** `sim_log_remove_channel` never rebuilds the output table
   (`sim_log_commit_change`) and always returns `True`. Do not close a file that TOSSIM still
   writes to.
+- **`Tossim::getNode()`** (`tos/lib/tossim/sf/tossim.c`) can reach the end without `return`
+  (GCC: `control reaches end of non-void function`).
 - **Runs are not repeatable by default**: the random seed comes from the clock
   (`gettimeofday`). Call `t.randomSeed(n)` to fix it.
 
@@ -135,7 +169,7 @@ apps and runs them:
   update), so this checks that a toolchain or fork change did not change the code being
   simulated. On a difference it lists the source files the changed code comes from. Today the
   references match in both images: the official TinyOS (`jammy-py2`, GCC 10) and the
-  `tossim-py3` fork with GCC 15 (`resolute-py3`) generate the same code. After an intended
+  `2.1.2-maintained` fork with GCC 15 (`resolute-py3`) generate the same code. After an intended
   change, regenerate the references with `GEN_C_UPDATE=<writable dir>` and commit them with it.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit

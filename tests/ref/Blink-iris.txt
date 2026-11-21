@@ -1,0 +1,1873 @@
+#define nx_struct struct
+#define nx_union union
+#define dbg(mode, format, ...) ((void)0)
+#define dbg_clear(mode, format, ...) ((void)0)
+#define dbg_active(mode) 0
+@@ TOSROOT/tos/system/tos.h
+typedef uint8_t bool;
+enum __nesc_unnamedN {
+  FALSE = 0, TRUE = 1
+};
+typedef nx_int8_t nx_bool;
+struct __nesc_attr_atmostonce {
+};
+struct __nesc_attr_atleastonce {
+};
+struct __nesc_attr_exactlyonce {
+};
+@@ TOSROOT/tos/types/TinyError.h
+enum __nesc_unnamedN {
+  SUCCESS = 0, 
+  FAIL = 1, 
+  ESIZE = 2, 
+  ECANCEL = 3, 
+  EOFF = 4, 
+  EBUSY = 5, 
+  EINVAL = 6, 
+  ERETRY = 7, 
+  ERESERVE = 8, 
+  EALREADY = 9, 
+  ENOMEM = 10, 
+  ENOACK = 11, 
+  ELAST = 11
+};
+typedef uint8_t error_t  ;
+static inline error_t ecombine(error_t r1, error_t r2)  ;
+@@ TOSROOT/tos/chips/atm1281/atm128hardware.h
+static __inline void __nesc_enable_interrupt()  ;
+static __inline void __nesc_disable_interrupt()  ;
+typedef uint8_t __nesc_atomic_t;
+__nesc_atomic_t __nesc_atomic_start(void );
+void __nesc_atomic_end(__nesc_atomic_t original_SREG);
+__inline __nesc_atomic_t 
+__nesc_atomic_start(void )   ;
+__inline void 
+__nesc_atomic_end(__nesc_atomic_t original_SREG)   ;
+typedef uint8_t mcu_power_t  ;
+enum __nesc_unnamedN {
+  ATM128_POWER_IDLE = 0, 
+  ATM128_POWER_ADC_NR = 1, 
+  ATM128_POWER_EXT_STANDBY = 2, 
+  ATM128_POWER_SAVE = 3, 
+  ATM128_POWER_STANDBY = 4, 
+  ATM128_POWER_DOWN = 5
+};
+static inline mcu_power_t mcombine(mcu_power_t m1, mcu_power_t m2)  ;
+typedef struct __nesc_unnamedN {
+  uint8_t porf : 1;
+  uint8_t extrf : 1;
+  uint8_t borf : 1;
+  uint8_t wdrf : 1;
+  uint8_t jtrf : 1;
+  uint8_t resv1 : 3;
+} Atm128_MCUSR_t;
+typedef struct __nesc_unnamedN {
+  uint8_t srw00 : 1;
+  uint8_t srw01 : 1;
+  uint8_t srw10 : 1;
+  uint8_t srw11 : 1;
+  uint8_t srl : 3;
+  uint8_t sre : 1;
+} Atm128_XMCRA_t;
+typedef struct __nesc_unnamedN {
+  uint8_t xmm : 3;
+  uint8_t resv1 : 4;
+  uint8_t xmbk : 1;
+} Atm128_XMCRB_t;
+typedef struct { unsigned char nxdata[4]; } __attribute__((packed)) nx_float;typedef float __nesc_nxbase_nx_float  ;
+@@ TOSROOT/tos/chips/atm1281/adc/Atm128Adc.h
+enum __nesc_unnamedN {
+  ATM128_ADC_VREF_OFF = 0, 
+  ATM128_ADC_VREF_AVCC = 1, 
+  ATM128_ADC_VREF_1_1 = 2, 
+  ATM128_ADC_VREF_2_56 = 3
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_RIGHT_ADJUST = 0, 
+  ATM128_ADC_LEFT_ADJUST = 1
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_SNGL_ADC0 = 0, 
+  ATM128_ADC_SNGL_ADC1, 
+  ATM128_ADC_SNGL_ADC2, 
+  ATM128_ADC_SNGL_ADC3, 
+  ATM128_ADC_SNGL_ADC4, 
+  ATM128_ADC_SNGL_ADC5, 
+  ATM128_ADC_SNGL_ADC6, 
+  ATM128_ADC_SNGL_ADC7, 
+  ATM128_ADC_DIFF_ADC00_10x, 
+  ATM128_ADC_DIFF_ADC10_10x, 
+  ATM128_ADC_DIFF_ADC00_200x, 
+  ATM128_ADC_DIFF_ADC10_200x, 
+  ATM128_ADC_DIFF_ADC22_10x, 
+  ATM128_ADC_DIFF_ADC32_10x, 
+  ATM128_ADC_DIFF_ADC22_200x, 
+  ATM128_ADC_DIFF_ADC32_200x, 
+  ATM128_ADC_DIFF_ADC01_1x, 
+  ATM128_ADC_DIFF_ADC11_1x, 
+  ATM128_ADC_DIFF_ADC21_1x, 
+  ATM128_ADC_DIFF_ADC31_1x, 
+  ATM128_ADC_DIFF_ADC41_1x, 
+  ATM128_ADC_DIFF_ADC51_1x, 
+  ATM128_ADC_DIFF_ADC61_1x, 
+  ATM128_ADC_DIFF_ADC71_1x, 
+  ATM128_ADC_DIFF_ADC02_1x, 
+  ATM128_ADC_DIFF_ADC12_1x, 
+  ATM128_ADC_DIFF_ADC22_1x, 
+  ATM128_ADC_DIFF_ADC32_1x, 
+  ATM128_ADC_DIFF_ADC42_1x, 
+  ATM128_ADC_DIFF_ADC52_1x, 
+  ATM128_ADC_SNGL_1_23, 
+  ATM128_ADC_SNGL_GND
+};
+typedef struct __nesc_unnamedN {
+  uint8_t mux : 5;
+  uint8_t adlar : 1;
+  uint8_t refs : 2;
+} Atm128Admux_t;
+enum __nesc_unnamedN {
+  ATM128_ADC_PRESCALE_2 = 0, 
+  ATM128_ADC_PRESCALE_2b, 
+  ATM128_ADC_PRESCALE_4, 
+  ATM128_ADC_PRESCALE_8, 
+  ATM128_ADC_PRESCALE_16, 
+  ATM128_ADC_PRESCALE_32, 
+  ATM128_ADC_PRESCALE_64, 
+  ATM128_ADC_PRESCALE_128, 
+  ATM128_ADC_PRESCALE
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_ENABLE_OFF = 0, 
+  ATM128_ADC_ENABLE_ON
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_START_CONVERSION_OFF = 0, 
+  ATM128_ADC_START_CONVERSION_ON
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_FREE_RUNNING_OFF = 0, 
+  ATM128_ADC_FREE_RUNNING_ON
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_INT_FLAG_OFF = 0, 
+  ATM128_ADC_INT_FLAG_ON
+};
+enum __nesc_unnamedN {
+  ATM128_ADC_INT_ENABLE_OFF = 0, 
+  ATM128_ADC_INT_ENABLE_ON
+};
+typedef struct __nesc_unnamedN {
+  uint8_t adps : 3;
+  uint8_t adie : 1;
+  uint8_t adif : 1;
+  uint8_t adate : 1;
+  uint8_t adsc : 1;
+  uint8_t aden : 1;
+} Atm128Adcsra_t;
+typedef struct __nesc_unnamedN {
+  uint8_t adts : 3;
+  uint8_t mux5 : 1;
+  uint8_t resv1 : 2;
+  uint8_t acme : 1;
+  uint8_t resv2 : 1;
+} Atm128Adcsrb_t;
+typedef uint8_t Atm128_ADCH_t;
+typedef uint8_t Atm128_ADCL_t;
+@@ TOSROOT/tos/lib/timer/Timer.h
+typedef struct __nesc_unnamedN {
+  int notUsed;
+} 
+TSecond;
+typedef struct __nesc_unnamedN {
+  int notUsed;
+} 
+TMilli;
+typedef struct __nesc_unnamedN {
+  int notUsed;
+} 
+T32khz;
+typedef struct __nesc_unnamedN {
+  int notUsed;
+} 
+TMicro;
+@@ TOSROOT/tos/chips/atm1281/timer/Atm128Timer.h
+enum __nesc_unnamedN {
+  ATM128_CLK8_OFF = 0x0, 
+  ATM128_CLK8_NORMAL = 0x1, 
+  ATM128_CLK8_DIVIDE_8 = 0x2, 
+  ATM128_CLK8_DIVIDE_32 = 0x3, 
+  ATM128_CLK8_DIVIDE_64 = 0x4, 
+  ATM128_CLK8_DIVIDE_128 = 0x5, 
+  ATM128_CLK8_DIVIDE_256 = 0x6, 
+  ATM128_CLK8_DIVIDE_1024 = 0x7
+};
+enum __nesc_unnamedN {
+  ATM128_CLK16_OFF = 0x0, 
+  ATM128_CLK16_NORMAL = 0x1, 
+  ATM128_CLK16_DIVIDE_8 = 0x2, 
+  ATM128_CLK16_DIVIDE_64 = 0x3, 
+  ATM128_CLK16_DIVIDE_256 = 0x4, 
+  ATM128_CLK16_DIVIDE_1024 = 0x5, 
+  ATM128_CLK16_EXTERNAL_FALL = 0x6, 
+  ATM128_CLK16_EXTERNAL_RISE = 0x7
+};
+enum __nesc_unnamedN {
+  AVR_CLOCK_OFF = 0, 
+  AVR_CLOCK_ON = 1, 
+  AVR_CLOCK_DIVIDE_8 = 2
+};
+enum __nesc_unnamedN {
+  ATM128_TIMER_COMPARE_NORMAL = 0, 
+  ATM128_TIMER_COMPARE_TOGGLE, 
+  ATM128_TIMER_COMPARE_CLEAR, 
+  ATM128_TIMER_COMPARE_SET
+};
+enum __nesc_unnamedN {
+  ATM128_WAVE8_NORMAL = 0, 
+  ATM128_WAVE8_PWM, 
+  ATM128_WAVE8_CTC, 
+  ATM128_WAVE8_PWM_FAST
+};
+enum __nesc_unnamedN {
+  ATM128_WAVE16_NORMAL = 0, 
+  ATM128_WAVE16_PWM_8BIT, 
+  ATM128_WAVE16_PWM_9BIT, 
+  ATM128_WAVE16_PWM_10BIT, 
+  ATM128_WAVE16_CTC_COMPARE, 
+  ATM128_WAVE16_PWM_FAST_8BIT, 
+  ATM128_WAVE16_PWM_FAST_9BIT, 
+  ATM128_WAVE16_PWM_FAST_10BIT, 
+  ATM128_WAVE16_PWM_CAPTURE_LOW, 
+  ATM128_WAVE16_PWM_COMPARE_LOW, 
+  ATM128_WAVE16_PWM_CAPTURE_HIGH, 
+  ATM128_WAVE16_PWM_COMPARE_HIGH, 
+  ATM128_WAVE16_CTC_CAPTURE, 
+  ATM128_WAVE16_RESERVED, 
+  ATM128_WAVE16_PWM_FAST_CAPTURE, 
+  ATM128_WAVE16_PWM_FAST_COMPARE
+};
+enum __nesc_unnamedN {
+  ATM128_COMPARE_OFF = 0, 
+  ATM128_COMPARE_TOGGLE, 
+  ATM128_COMPARE_CLEAR, 
+  ATM128_COMPARE_SET
+};
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t wgm00 : 1;
+    uint8_t wgm01 : 1;
+    uint8_t resv1 : 2;
+    uint8_t com0b0 : 1;
+    uint8_t com0b1 : 1;
+    uint8_t com0a0 : 1;
+    uint8_t com0a1 : 1;
+  } bits;
+} Atm128_TCCR0A_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t cs00 : 1;
+    uint8_t cs01 : 1;
+    uint8_t cs02 : 2;
+    uint8_t wgm02 : 1;
+    uint8_t resv1 : 2;
+    uint8_t foc0b : 1;
+    uint8_t foc0a : 1;
+  } bits;
+} Atm128_TCCR0B_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t toie0 : 1;
+    uint8_t ocie0a : 1;
+    uint8_t ocie0e : 1;
+    uint8_t resv1 : 5;
+  } bits;
+} Atm128_TIMSK0_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t tov0 : 1;
+    uint8_t ocf0a : 1;
+    uint8_t ocf0b : 1;
+    uint8_t resv1 : 5;
+  } bits;
+} Atm128_TIFR0_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t tcr2bub : 1;
+    uint8_t tcr2aub : 1;
+    uint8_t ocr2bub : 1;
+    uint8_t ocr2aub : 1;
+    uint8_t tcn2ub : 1;
+    uint8_t as2 : 1;
+    uint8_t exclk : 1;
+    uint8_t resv1 : 1;
+  } bits;
+} Atm128_ASSR_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t wgm20 : 1;
+    uint8_t wgm21 : 1;
+    uint8_t resv1 : 2;
+    uint8_t comb : 2;
+    uint8_t coma : 2;
+  } bits;
+} Atm128_TCCR2A_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t cs : 3;
+    uint8_t wgm22 : 1;
+    uint8_t resv1 : 2;
+    uint8_t foc2b : 1;
+    uint8_t foc2a : 1;
+  } bits;
+} Atm128_TCCR2B_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t toie : 1;
+    uint8_t ociea : 1;
+    uint8_t ocieb : 1;
+    uint8_t resv1 : 5;
+  } bits;
+} Atm128_TIMSK2_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t tov : 1;
+    uint8_t ocfa : 1;
+    uint8_t ocfb : 1;
+    uint8_t resv1 : 5;
+  } bits;
+} Atm128_TIFR2_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t wgm01 : 2;
+    uint8_t comc : 2;
+    uint8_t comb : 2;
+    uint8_t coma : 2;
+  } bits;
+} Atm128_TCCRA_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t cs : 3;
+    uint8_t wgm23 : 2;
+    uint8_t resv1 : 1;
+    uint8_t ices : 1;
+    uint8_t icnc : 1;
+  } bits;
+} Atm128_TCCRB_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t resv1 : 5;
+    uint8_t focc : 1;
+    uint8_t focb : 1;
+    uint8_t foca : 1;
+  } bits;
+} Atm128_TCCRC_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t toie : 1;
+    uint8_t ociea : 1;
+    uint8_t ocieb : 1;
+    uint8_t ociec : 1;
+    uint8_t resv1 : 1;
+    uint8_t icie : 1;
+    uint8_t resv2 : 2;
+  } bits;
+} Atm128_TIMSK_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t tov : 1;
+    uint8_t ocfa : 1;
+    uint8_t ocfb : 1;
+    uint8_t ocfc : 1;
+    uint8_t resv1 : 1;
+    uint8_t icf : 1;
+    uint8_t resv2 : 2;
+  } bits;
+} Atm128_TIFR_t;
+typedef union __nesc_unnamedN {
+  uint8_t flat;
+  struct __nesc_unnamedN {
+    uint8_t psrsync : 1;
+    uint8_t psrasy : 1;
+    uint8_t resv1 : 5;
+    uint8_t tsm : 1;
+  } bits;
+} Atm128_GTCCR_t;
+typedef uint8_t Atm128_TCNT1H_t;
+typedef uint8_t Atm128_TCNT1L_t;
+typedef uint8_t Atm128_TCNT3H_t;
+typedef uint8_t Atm128_TCNT3L_t;
+typedef uint8_t Atm128_TCNT4H_t;
+typedef uint8_t Atm128_TCNT4L_t;
+typedef uint8_t Atm128_TCNT5H_t;
+typedef uint8_t Atm128_TCNT5L_t;
+typedef uint8_t Atm128_OCR1AH_t;
+typedef uint8_t Atm128_OCR1AL_t;
+typedef uint8_t Atm128_OCR1BH_t;
+typedef uint8_t Atm128_OCR1BL_t;
+typedef uint8_t Atm128_OCR1CH_t;
+typedef uint8_t Atm128_OCR1CL_t;
+typedef uint8_t Atm128_OCR3AH_t;
+typedef uint8_t Atm128_OCR3AL_t;
+typedef uint8_t Atm128_OCR3BH_t;
+typedef uint8_t Atm128_OCR3BL_t;
+typedef uint8_t Atm128_OCR3CH_t;
+typedef uint8_t Atm128_OCR3CL_t;
+typedef uint8_t Atm128_OCR4AH_t;
+typedef uint8_t Atm128_OCR4AL_t;
+typedef uint8_t Atm128_OCR4BH_t;
+typedef uint8_t Atm128_OCR4BL_t;
+typedef uint8_t Atm128_OCR4CH_t;
+typedef uint8_t Atm128_OCR4CL_t;
+typedef uint8_t Atm128_OCR5AH_t;
+typedef uint8_t Atm128_OCR5AL_t;
+typedef uint8_t Atm128_OCR5BH_t;
+typedef uint8_t Atm128_OCR5BL_t;
+typedef uint8_t Atm128_OCR5CH_t;
+typedef uint8_t Atm128_OCR5CL_t;
+typedef uint8_t Atm128_ICR1H_t;
+typedef uint8_t Atm128_ICR1L_t;
+typedef uint8_t Atm128_ICR3H_t;
+typedef uint8_t Atm128_ICR3L_t;
+typedef uint8_t Atm128_ICR4H_t;
+typedef uint8_t Atm128_ICR4L_t;
+typedef uint8_t Atm128_ICR5H_t;
+typedef uint8_t Atm128_ICR5L_t;
+@@ TOSROOT/tos/platforms/iris/MicaTimer.h
+typedef struct __nesc_unnamedN {
+} 
+T64khz;
+typedef struct __nesc_unnamedN {
+} 
+T128khz;
+typedef struct __nesc_unnamedN {
+} 
+T2mhz;
+typedef struct __nesc_unnamedN {
+} 
+T4mhz;
+typedef TMicro TOne;
+typedef TMicro TThree;
+typedef uint32_t counter_one_overflow_t;
+typedef uint16_t counter_three_overflow_t;
+enum __nesc_unnamedN {
+  MICA_PRESCALER_ONE = ATM128_CLK16_DIVIDE_8, 
+  MICA_DIVIDE_ONE_FOR_32KHZ_LOG2 = 5, 
+  MICA_PRESCALER_THREE = ATM128_CLK16_DIVIDE_8, 
+  MICA_DIVIDE_THREE_FOR_MICRO_LOG2 = 0, 
+  EXT_STANDBY_T0_THRESHOLD = 12
+};
+enum __nesc_unnamedN {
+  PLATFORM_MHZ = 8
+};
+@@ TOSROOT/tos/platforms/micaz/hardware.h
+enum __nesc_unnamedN {
+  TOS_SLEEP_NONE = ATM128_POWER_IDLE
+};
+enum __nesc_unnamedN {
+  CHANNEL_THERMISTOR = ATM128_ADC_SNGL_ADC1
+};
+enum __nesc_unnamedN {
+  PLATFORM_BAUDRATE = 57600L
+};
+@@ TOSROOT/tos/types/Leds.h
+enum __nesc_unnamedN {
+  LEDS_LED0 = 1 << 0, 
+  LEDS_LED1 = 1 << 1, 
+  LEDS_LED2 = 1 << 2, 
+  LEDS_LED3 = 1 << 3, 
+  LEDS_LED4 = 1 << 4, 
+  LEDS_LED5 = 1 << 5, 
+  LEDS_LED6 = 1 << 6, 
+  LEDS_LED7 = 1 << 7
+};
+typedef TMilli BlinkC__Timer0__precision_tag;
+typedef TMilli BlinkC__Timer1__precision_tag;
+typedef TMilli BlinkC__Timer2__precision_tag;
+enum HilTimerMilliC____nesc_unnamedN {
+  HilTimerMilliC__TIMER_COUNT = 3U
+};
+typedef TMilli /*AlarmCounterMilliP.Atm128AlarmAsyncC*/Atm128AlarmAsyncC__0__precision;
+typedef /*AlarmCounterMilliP.Atm128AlarmAsyncC*/Atm128AlarmAsyncC__0__precision /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__precision;
+typedef /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__precision /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__precision_tag;
+typedef uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__size_type;
+typedef /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__precision /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__precision_tag;
+typedef uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__size_type;
+typedef uint8_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__size_type;
+typedef uint8_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__timer_size;
+typedef uint8_t HplAtm1281Timer2AsyncP__Compare__size_type;
+typedef uint8_t HplAtm1281Timer2AsyncP__Timer__timer_size;
+typedef TMilli /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__precision_tag;
+typedef /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__precision_tag /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__precision_tag;
+typedef uint32_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type;
+typedef /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__precision_tag /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__precision_tag;
+typedef TMilli /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__precision_tag;
+typedef /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__precision_tag /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__precision_tag;
+typedef /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__precision_tag /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__precision_tag;
+typedef TMilli /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__precision_tag;
+typedef /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__precision_tag /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__LocalTime__precision_tag;
+typedef /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__precision_tag /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__precision_tag;
+typedef uint32_t /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__size_type;
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t PlatformP__Init__init(void );
+static error_t MotePlatformP__SubInit__default__init(void );
+static error_t MotePlatformP__PlatformInit__init(void );
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+static void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__toggle(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__makeOutput(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__set(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__toggle(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__makeOutput(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__set(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__toggle(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__makeOutput(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__set(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__makeInput(void );
+static void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__clr(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t MeasureClockC__Init__init(void );
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static error_t SchedulerBasicP__TaskBasic__postTask(
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+uint8_t arg_X);
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static void SchedulerBasicP__TaskBasic__default__runTask(
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+uint8_t arg_X);
+@@ TOSROOT/tos/interfaces/Scheduler.nc
+static void SchedulerBasicP__Scheduler__init(void );
+static void SchedulerBasicP__Scheduler__taskLoop(void );
+static bool SchedulerBasicP__Scheduler__runNextTask(void );
+@@ TOSROOT/tos/interfaces/McuSleep.nc
+static void McuSleepC__McuSleep__sleep(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void BlinkC__Timer0__fired(void );
+@@ TOSROOT/tos/interfaces/Boot.nc
+static void BlinkC__Boot__booted(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void BlinkC__Timer1__fired(void );
+static void BlinkC__Timer2__fired(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t LedsP__Init__init(void );
+@@ TOSROOT/tos/interfaces/Leds.nc
+static void LedsP__Leds__led0Toggle(void );
+static void LedsP__Leds__led1Toggle(void );
+static void LedsP__Leds__led2Toggle(void );
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__size_type /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getNow(void );
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__startAt(/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__size_type t0, /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__size_type dt);
+static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__size_type /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getAlarm(void );
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__stop(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Init__init(void );
+@@ TOSROOT/tos/lib/timer/Counter.nc
+static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__size_type /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__get(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__fired(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__overflow(void );
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerCtrl8.nc
+static uint8_t HplAtm1281Timer2AsyncP__TimerCtrl__getInterruptFlag(void );
+static void HplAtm1281Timer2AsyncP__TimerCtrl__setControlB(uint8_t control);
+static void HplAtm1281Timer2AsyncP__TimerCtrl__setControlA(uint8_t control);
+@@ TOSROOT/tos/interfaces/McuPowerOverride.nc
+static mcu_power_t HplAtm1281Timer2AsyncP__McuPowerOverride__lowestState(void );
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerAsync.nc
+static void HplAtm1281Timer2AsyncP__TimerAsync__setTimer2Asynchronous(void );
+static int HplAtm1281Timer2AsyncP__TimerAsync__compareABusy(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+static HplAtm1281Timer2AsyncP__Compare__size_type HplAtm1281Timer2AsyncP__Compare__get(void );
+static void HplAtm1281Timer2AsyncP__Compare__set(HplAtm1281Timer2AsyncP__Compare__size_type t);
+static void HplAtm1281Timer2AsyncP__Compare__start(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+static HplAtm1281Timer2AsyncP__Timer__timer_size HplAtm1281Timer2AsyncP__Timer__get(void );
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__runTask(void );
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__fired(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static uint32_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__getNow(void );
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__startOneShotAt(uint32_t t0, uint32_t dt);
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__stop(void );
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__runTask(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__fired(void );
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+uint8_t arg_X);
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+uint8_t arg_X, 
+@@ TOSROOT/tos/lib/timer/Timer.nc
+uint32_t dt);
+@@ TOSROOT/tos/lib/timer/Counter.nc
+static void /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__overflow(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t PlatformP__MoteInit__init(void );
+static error_t PlatformP__MeasureClock__init(void );
+@@ TOSROOT/tos/platforms/mica/PlatformP.nc
+static inline error_t PlatformP__Init__init(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t MotePlatformP__SubInit__init(void );
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+static void MotePlatformP__SerialIdPin__makeInput(void );
+static void MotePlatformP__SerialIdPin__clr(void );
+@@ TOSROOT/tos/platforms/micaz/MotePlatformP.nc
+static inline error_t MotePlatformP__PlatformInit__init(void );
+static inline error_t MotePlatformP__SubInit__default__init(void );
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__set(void );
+static inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__toggle(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__makeOutput(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__set(void );
+static inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__toggle(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__makeOutput(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__set(void );
+static inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__toggle(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__makeOutput(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__clr(void );
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__makeInput(void );
+@@ TOSROOT/tos/platforms/iris/MeasureClockC.nc
+enum MeasureClockC____nesc_unnamedN {
+  MeasureClockC__MAGIC = 488 / (16 / PLATFORM_MHZ)
+};
+uint16_t MeasureClockC__cycles;
+static inline error_t MeasureClockC__Init__init(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t RealMainP__SoftwareInit__init(void );
+@@ TOSROOT/tos/interfaces/Boot.nc
+static void RealMainP__Boot__booted(void );
+@@ TOSROOT/tos/interfaces/Init.nc
+static error_t RealMainP__PlatformInit__init(void );
+@@ TOSROOT/tos/interfaces/Scheduler.nc
+static void RealMainP__Scheduler__init(void );
+static void RealMainP__Scheduler__taskLoop(void );
+static bool RealMainP__Scheduler__runNextTask(void );
+@@ TOSROOT/tos/system/RealMainP.nc
+int main(void )   ;
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static void SchedulerBasicP__TaskBasic__runTask(
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+uint8_t arg_X);
+@@ TOSROOT/tos/interfaces/McuSleep.nc
+static void SchedulerBasicP__McuSleep__sleep(void );
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+enum SchedulerBasicP____nesc_unnamedN {
+  SchedulerBasicP__NUM_TASKS = 2U, 
+  SchedulerBasicP__NO_TASK = 255
+};
+uint8_t SchedulerBasicP__m_head;
+uint8_t SchedulerBasicP__m_tail;
+uint8_t SchedulerBasicP__m_next[SchedulerBasicP__NUM_TASKS];
+static __inline uint8_t SchedulerBasicP__popTask(void );
+static inline bool SchedulerBasicP__isWaiting(uint8_t id);
+static inline bool SchedulerBasicP__pushTask(uint8_t id);
+static inline void SchedulerBasicP__Scheduler__init(void );
+static bool SchedulerBasicP__Scheduler__runNextTask(void );
+static inline void SchedulerBasicP__Scheduler__taskLoop(void );
+static error_t SchedulerBasicP__TaskBasic__postTask(uint8_t id);
+static inline void SchedulerBasicP__TaskBasic__default__runTask(uint8_t id);
+@@ TOSROOT/tos/interfaces/McuPowerOverride.nc
+static mcu_power_t McuSleepC__McuPowerOverride__lowestState(void );
+@@ TOSROOT/tos/chips/atm1281/McuSleepC.nc
+const uint8_t __attribute((__progmem__)) McuSleepC__atm128PowerBits[ATM128_POWER_DOWN + 1] = { 
+0, 
+1 << 1, ((
+1 << 3) | (1 << 2)) | (1 << 1), (
+1 << 2) | (1 << 1), (
+1 << 3) | (1 << 2), 
+1 << 2 };
+static inline mcu_power_t McuSleepC__getPowerState(void );
+static inline void McuSleepC__McuSleep__sleep(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void BlinkC__Timer0__startPeriodic(uint32_t dt);
+static void BlinkC__Timer1__startPeriodic(uint32_t dt);
+@@ TOSROOT/tos/interfaces/Leds.nc
+static void BlinkC__Leds__led0Toggle(void );
+static void BlinkC__Leds__led1Toggle(void );
+static void BlinkC__Leds__led2Toggle(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void BlinkC__Timer2__startPeriodic(uint32_t dt);
+@@ BlinkC.nc
+static inline void BlinkC__Boot__booted(void );
+static inline void BlinkC__Timer0__fired(void );
+static inline void BlinkC__Timer1__fired(void );
+static inline void BlinkC__Timer2__fired(void );
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+static void LedsP__Led0__toggle(void );
+static void LedsP__Led0__makeOutput(void );
+static void LedsP__Led0__set(void );
+static void LedsP__Led1__toggle(void );
+static void LedsP__Led1__makeOutput(void );
+static void LedsP__Led1__set(void );
+static void LedsP__Led2__toggle(void );
+static void LedsP__Led2__makeOutput(void );
+static void LedsP__Led2__set(void );
+@@ TOSROOT/tos/system/LedsP.nc
+static inline error_t LedsP__Init__init(void );
+static inline void LedsP__Leds__led0Toggle(void );
+static inline void LedsP__Leds__led1Toggle(void );
+static inline void LedsP__Leds__led2Toggle(void );
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerCtrl8.nc
+static uint8_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__getInterruptFlag(void );
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlB(uint8_t control);
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlA(uint8_t control);
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__fired(void );
+@@ TOSROOT/tos/lib/timer/Counter.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__overflow(void );
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerAsync.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__setTimer2Asynchronous(void );
+static int /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__compareABusy(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__size_type /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__get(void );
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__set(/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__size_type t);
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__start(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__timer_size /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get(void );
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+uint8_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__set;
+uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__t0;
+uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__dt;
+uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base;
+enum /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0____nesc_unnamedN {
+  Atm1281AlarmAsyncP__0__MINDT = 2, 
+  Atm1281AlarmAsyncP__0__MAXT = 230
+};
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt(void );
+static inline error_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Init__init(void );
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setOcr2A(uint8_t n);
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt(void );
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__fired(void );
+static uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__get(void );
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__stop(void );
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__startAt(uint32_t nt0, uint32_t ndt);
+static inline uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getNow(void );
+static inline uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getAlarm(void );
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__overflow(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+static void HplAtm1281Timer2AsyncP__Compare__fired(void );
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+static void HplAtm1281Timer2AsyncP__Timer__overflow(void );
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline uint8_t HplAtm1281Timer2AsyncP__Timer__get(void );
+static inline void HplAtm1281Timer2AsyncP__TimerCtrl__setControlA(uint8_t x);
+static inline void HplAtm1281Timer2AsyncP__TimerCtrl__setControlB(uint8_t x);
+static inline uint8_t HplAtm1281Timer2AsyncP__TimerCtrl__getInterruptFlag(void );
+static inline void HplAtm1281Timer2AsyncP__Compare__start(void );
+static inline uint8_t HplAtm1281Timer2AsyncP__Compare__get(void );
+static inline void HplAtm1281Timer2AsyncP__Compare__set(uint8_t t);
+static __inline void HplAtm1281Timer2AsyncP__stabiliseTimer2(void );
+static inline mcu_power_t HplAtm1281Timer2AsyncP__McuPowerOverride__lowestState(void );
+void __vector_13(void ) __attribute((signal))   ;
+void __vector_15(void ) __attribute((signal))   ;
+static inline void HplAtm1281Timer2AsyncP__TimerAsync__setTimer2Asynchronous(void );
+static inline int HplAtm1281Timer2AsyncP__TimerAsync__compareABusy(void );
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static error_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__postTask(void );
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+static /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getNow(void );
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__startAt(/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type t0, /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type dt);
+static /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getAlarm(void );
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__stop(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__fired(void );
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+enum /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0____nesc_unnamedN {
+  AlarmToTimerC__0__fired = 0U
+};
+typedef int /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0____nesc_sillytask_fired[/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired];
+uint32_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_dt;
+bool /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_oneshot;
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__start(uint32_t t0, uint32_t dt, bool oneshot);
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__stop(void );
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__runTask(void );
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__fired(void );
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__startOneShotAt(uint32_t t0, uint32_t dt);
+static inline uint32_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__getNow(void );
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+static error_t /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask(void );
+@@ TOSROOT/tos/lib/timer/Timer.nc
+static uint32_t /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__getNow(void );
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__startOneShotAt(uint32_t t0, uint32_t dt);
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__stop(void );
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+uint8_t arg_X);
+enum /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0____nesc_unnamedN {
+  VirtualizeTimerC__0__updateFromTimer = 1U
+};
+typedef int /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0____nesc_sillytask_updateFromTimer[/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer];
+enum /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0____nesc_unnamedN {
+  VirtualizeTimerC__0__NUM_TIMERS = 3, 
+  VirtualizeTimerC__0__END_OF_LIST = 255
+};
+typedef struct /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0____nesc_unnamedN {
+  uint32_t t0;
+  uint32_t dt;
+  bool isoneshot : 1;
+  bool isrunning : 1;
+  bool _reserved : 6;
+} /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer_t;
+/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer_t /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__m_timers[/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__NUM_TIMERS];
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(uint32_t now);
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__runTask(void );
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__fired(void );
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__startTimer(uint8_t num, uint32_t t0, uint32_t dt, bool isoneshot);
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(uint8_t num, uint32_t dt);
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(uint8_t num);
+@@ TOSROOT/tos/lib/timer/CounterToLocalTimeC.nc
+static inline void /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__overflow(void );
+@@ TOSROOT/tos/chips/atm1281/atm128hardware.h
+static __inline  void __nesc_disable_interrupt()
+{
+   __asm volatile ("cli" :  :  : "memory");}
+__inline   __nesc_atomic_t 
+__nesc_atomic_start(void )
+{
+  __nesc_atomic_t result = * (volatile uint8_t *)(0x3F + 0x20);
+  __nesc_disable_interrupt();
+   __asm volatile ("" :  :  : "memory");
+  return result;
+}
+__inline   void 
+__nesc_atomic_end(__nesc_atomic_t original_SREG)
+{
+   __asm volatile ("" :  :  : "memory");
+  * (volatile uint8_t *)(0x3F + 0x20) = original_SREG;
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static inline void SchedulerBasicP__Scheduler__init(void )
+{
+  /* atomic removed: atomic calls only */
+  {
+    memset((void *)SchedulerBasicP__m_next, SchedulerBasicP__NO_TASK, sizeof SchedulerBasicP__m_next);
+    SchedulerBasicP__m_head = SchedulerBasicP__NO_TASK;
+    SchedulerBasicP__m_tail = SchedulerBasicP__NO_TASK;
+  }
+}
+@@ TOSROOT/tos/interfaces/Scheduler.nc
+inline static void RealMainP__Scheduler__init(void ){
+  SchedulerBasicP__Scheduler__init();
+}
+@@ TOSROOT/tos/types/TinyError.h
+static inline  error_t ecombine(error_t r1, error_t r2)
+{
+  return r1 == r2 ? r1 : FAIL;
+}
+@@ TOSROOT/tos/platforms/micaz/MotePlatformP.nc
+static inline error_t MotePlatformP__SubInit__default__init(void )
+{
+  return SUCCESS;
+}
+@@ TOSROOT/tos/interfaces/Init.nc
+inline static error_t MotePlatformP__SubInit__init(void ){
+  unsigned char __nesc_result;
+  __nesc_result = MotePlatformP__SubInit__default__init();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__clr(void )
+{
+  * (volatile uint8_t * )34U &= ~(1 << 4);
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void MotePlatformP__SerialIdPin__clr(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__clr();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__makeInput(void )
+{
+  * (volatile uint8_t * )33U &= ~(1 << 4);
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void MotePlatformP__SerialIdPin__makeInput(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit4*/HplAtm128GeneralIOPinP__4__IO__makeInput();
+}
+@@ TOSROOT/tos/platforms/micaz/MotePlatformP.nc
+static inline error_t MotePlatformP__PlatformInit__init(void )
+{
+  * (volatile uint8_t *)(0x08 + 0x20) = 0;
+  * (volatile uint8_t *)(0x07 + 0x20) = 0xff;
+  MotePlatformP__SerialIdPin__makeInput();
+  MotePlatformP__SerialIdPin__clr();
+  return MotePlatformP__SubInit__init();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__set(void )
+{
+  * (volatile uint8_t * )34U |= 1 << 0;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led2__set(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__set();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__set(void )
+{
+  * (volatile uint8_t * )34U |= 1 << 1;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led1__set(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__set();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__set(void )
+{
+  * (volatile uint8_t * )34U |= 1 << 2;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led0__set(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__set();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__makeOutput(void )
+{
+  * (volatile uint8_t * )33U |= 1 << 0;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led2__makeOutput(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__makeOutput();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__makeOutput(void )
+{
+  * (volatile uint8_t * )33U |= 1 << 1;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led1__makeOutput(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__makeOutput();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static __inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__makeOutput(void )
+{
+  * (volatile uint8_t * )33U |= 1 << 2;
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led0__makeOutput(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__makeOutput();
+}
+@@ TOSROOT/tos/system/LedsP.nc
+static inline error_t LedsP__Init__init(void )
+{
+  /* atomic removed: atomic calls only */
+  {
+    ;
+    LedsP__Led0__makeOutput();
+    LedsP__Led1__makeOutput();
+    LedsP__Led2__makeOutput();
+    LedsP__Led0__set();
+    LedsP__Led1__set();
+    LedsP__Led2__set();
+  }
+  return SUCCESS;
+}
+@@ TOSROOT/tos/interfaces/Init.nc
+inline static error_t PlatformP__MoteInit__init(void ){
+  unsigned char __nesc_result;
+  __nesc_result = LedsP__Init__init();
+  __nesc_result = ecombine(__nesc_result, MotePlatformP__PlatformInit__init());
+  return __nesc_result;
+}
+@@ TOSROOT/tos/platforms/iris/MeasureClockC.nc
+static inline error_t MeasureClockC__Init__init(void )
+{
+  /* atomic removed: atomic calls only */
+  {
+    uint8_t now;
+    uint8_t wraps;
+    uint16_t start;
+    * (volatile uint8_t *)0x81 = 1 << 0;
+    * (volatile uint8_t *)0xB6 = 1 << 5;
+    * (volatile uint8_t *)0xB1 = (1 << 1) | (1 << 0);
+    start = * (volatile uint16_t *)0x84;
+    for (wraps = MeasureClockC__MAGIC / 2; wraps; ) 
+      {
+        uint16_t next = * (volatile uint16_t *)0x84;
+        if (next < start) {
+          wraps--;
+          }
+        start = next;
+      }
+    now = * (volatile uint8_t *)0xB2;
+    while (* (volatile uint8_t *)0xB2 == now) ;
+    start = * (volatile uint16_t *)0x84;
+    now = * (volatile uint8_t *)0xB2;
+    while (* (volatile uint8_t *)0xB2 == now) ;
+    MeasureClockC__cycles = * (volatile uint16_t *)0x84;
+    MeasureClockC__cycles = (MeasureClockC__cycles - start + 16) >> 5;
+    * (volatile uint8_t *)0xB6 = * (volatile uint8_t *)0x81 = * (volatile uint8_t *)0xB1 = 0;
+    * (volatile uint8_t *)0xB2 = 0;
+    * (volatile uint16_t *)0x84 = 0;
+    * (volatile uint8_t *)(0x16 + 0x20) = * (volatile uint8_t *)(0x17 + 0x20) = 0xff;
+    while (* (volatile uint8_t *)0xB6 & (((1 << 4) | (1 << 2)) | (1 << 0))) 
+      ;
+  }
+  return SUCCESS;
+}
+@@ TOSROOT/tos/interfaces/Init.nc
+inline static error_t PlatformP__MeasureClock__init(void ){
+  unsigned char __nesc_result;
+  __nesc_result = MeasureClockC__Init__init();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/platforms/mica/PlatformP.nc
+static inline error_t PlatformP__Init__init(void )
+{
+  error_t ok;
+  ok = PlatformP__MeasureClock__init();
+  ok = ecombine(ok, PlatformP__MoteInit__init());
+  return ok;
+}
+@@ TOSROOT/tos/interfaces/Init.nc
+inline static error_t RealMainP__PlatformInit__init(void ){
+  unsigned char __nesc_result;
+  __nesc_result = PlatformP__Init__init();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/interfaces/Scheduler.nc
+inline static bool RealMainP__Scheduler__runNextTask(void ){
+  unsigned char __nesc_result;
+  __nesc_result = SchedulerBasicP__Scheduler__runNextTask();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline uint8_t HplAtm1281Timer2AsyncP__TimerCtrl__getInterruptFlag(void )
+{
+  return * (volatile uint8_t *)(0x17 + 0x20);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerCtrl8.nc
+inline static uint8_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__getInterruptFlag(void ){
+  unsigned char __nesc_result;
+  __nesc_result = HplAtm1281Timer2AsyncP__TimerCtrl__getInterruptFlag();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__stop(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__set = FALSE;
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+inline static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__stop(void ){
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__stop();
+}
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__stop(void )
+{
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__stop();
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__stop(void ){
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__stop();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static inline void /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__toggle(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    * (volatile uint8_t * )34U ^= 1 << 2;
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led0__toggle(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit2*/HplAtm128GeneralIOPinP__2__IO__toggle();
+}
+@@ TOSROOT/tos/system/LedsP.nc
+static inline void LedsP__Leds__led0Toggle(void )
+{
+  LedsP__Led0__toggle();
+  ;
+  ;
+}
+@@ TOSROOT/tos/interfaces/Leds.nc
+inline static void BlinkC__Leds__led0Toggle(void ){
+  LedsP__Leds__led0Toggle();
+}
+@@ BlinkC.nc
+static inline void BlinkC__Timer0__fired(void )
+{
+  ;
+  BlinkC__Leds__led0Toggle();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static inline void /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__toggle(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    * (volatile uint8_t * )34U ^= 1 << 1;
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led1__toggle(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit1*/HplAtm128GeneralIOPinP__1__IO__toggle();
+}
+@@ TOSROOT/tos/system/LedsP.nc
+static inline void LedsP__Leds__led1Toggle(void )
+{
+  LedsP__Led1__toggle();
+  ;
+  ;
+}
+@@ TOSROOT/tos/interfaces/Leds.nc
+inline static void BlinkC__Leds__led1Toggle(void ){
+  LedsP__Leds__led1Toggle();
+}
+@@ BlinkC.nc
+static inline void BlinkC__Timer1__fired(void )
+{
+  ;
+  BlinkC__Leds__led1Toggle();
+}
+@@ TOSROOT/tos/chips/atm128/pins/HplAtm128GeneralIOPinP.nc
+static inline void /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__toggle(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    * (volatile uint8_t * )34U ^= 1 << 0;
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/interfaces/GeneralIO.nc
+inline static void LedsP__Led2__toggle(void ){
+  /*HplAtm128GeneralIOC.PortA.Bit0*/HplAtm128GeneralIOPinP__0__IO__toggle();
+}
+@@ TOSROOT/tos/system/LedsP.nc
+static inline void LedsP__Leds__led2Toggle(void )
+{
+  LedsP__Led2__toggle();
+  ;
+  ;
+}
+@@ TOSROOT/tos/interfaces/Leds.nc
+inline static void BlinkC__Leds__led2Toggle(void ){
+  LedsP__Leds__led2Toggle();
+}
+@@ BlinkC.nc
+static inline void BlinkC__Timer2__fired(void )
+{
+  ;
+  BlinkC__Leds__led2Toggle();
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(uint8_t num)
+{
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(uint8_t arg_X){
+  switch (arg_X) {
+    case 0U:
+      BlinkC__Timer0__fired();
+      break;
+    case 1U:
+      BlinkC__Timer1__fired();
+      break;
+    case 2U:
+      BlinkC__Timer2__fired();
+      break;
+    default:
+      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(arg_X);
+      break;
+    }
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static inline bool SchedulerBasicP__isWaiting(uint8_t id)
+{
+  return SchedulerBasicP__m_next[id] != SchedulerBasicP__NO_TASK || SchedulerBasicP__m_tail == id;
+}
+static inline bool SchedulerBasicP__pushTask(uint8_t id)
+{
+  if (!SchedulerBasicP__isWaiting(id)) 
+    {
+      if (SchedulerBasicP__m_head == SchedulerBasicP__NO_TASK) 
+        {
+          SchedulerBasicP__m_head = id;
+          SchedulerBasicP__m_tail = id;
+        }
+      else 
+        {
+          SchedulerBasicP__m_next[SchedulerBasicP__m_tail] = id;
+          SchedulerBasicP__m_tail = id;
+        }
+      return TRUE;
+    }
+  else 
+    {
+      return FALSE;
+    }
+}
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+inline static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__startAt(/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type t0, /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type dt){
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__startAt(t0, dt);
+}
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__start(uint32_t t0, uint32_t dt, bool oneshot)
+{
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_dt = dt;
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_oneshot = oneshot;
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__startAt(t0, dt);
+}
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__startOneShotAt(uint32_t t0, uint32_t dt)
+{
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__start(t0, dt, TRUE);
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__startOneShotAt(uint32_t t0, uint32_t dt){
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__startOneShotAt(t0, dt);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline void HplAtm1281Timer2AsyncP__Compare__set(uint8_t t)
+{
+  /* atomic removed: atomic calls only */
+  {
+    while (* (volatile uint8_t *)0xB6 & (1 << 3)) 
+      ;
+    * (volatile uint8_t *)0xB3 = t;
+  }
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__set(/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__size_type t){
+  HplAtm1281Timer2AsyncP__Compare__set(t);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline uint8_t HplAtm1281Timer2AsyncP__Timer__get(void )
+{
+  return * (volatile uint8_t *)0xB2;
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+inline static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__timer_size /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get(void ){
+  unsigned char __nesc_result;
+  __nesc_result = HplAtm1281Timer2AsyncP__Timer__get();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline int HplAtm1281Timer2AsyncP__TimerAsync__compareABusy(void )
+{
+  return (* (volatile uint8_t *)0xB6 & (1 << 3)) != 0;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerAsync.nc
+inline static int /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__compareABusy(void ){
+  int __nesc_result;
+  __nesc_result = HplAtm1281Timer2AsyncP__TimerAsync__compareABusy();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setOcr2A(uint8_t n)
+{
+  while (/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__compareABusy()) 
+    ;
+  if (n == /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get()) {
+    n++;
+    }
+  if (/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base + n + 1 < /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base) {
+    n = -/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base - 1;
+    }
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__set(n);
+}
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+inline static error_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__postTask(void ){
+  unsigned char __nesc_result;
+  __nesc_result = SchedulerBasicP__TaskBasic__postTask(/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired);
+  return __nesc_result;
+}
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+static inline void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__fired(void )
+{
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__postTask();
+}
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__fired(void ){
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__fired();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getAlarm(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      unsigned long __nesc_temp = 
+      /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__t0 + /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__dt;
+      {
+        __nesc_atomic_end(__nesc_atomic); 
+        return __nesc_temp;
+      }
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+inline static /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getAlarm(void ){
+  unsigned long __nesc_result;
+  __nesc_result = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getAlarm();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getNow(void )
+{
+  return /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__get();
+}
+@@ TOSROOT/tos/lib/timer/Alarm.nc
+inline static /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__size_type /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getNow(void ){
+  unsigned long __nesc_result;
+  __nesc_result = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__getNow();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+static inline uint32_t /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__getNow(void )
+{
+  return /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getNow();
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static uint32_t /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__getNow(void ){
+  unsigned long __nesc_result;
+  __nesc_result = /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__getNow();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__fired(void )
+{
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__getNow());
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__fired(void ){
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__fired();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline void HplAtm1281Timer2AsyncP__Compare__start(void )
+{
+  * (volatile uint8_t *)0x70 |= 1 << 1;
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__start(void ){
+  HplAtm1281Timer2AsyncP__Compare__start();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline void HplAtm1281Timer2AsyncP__TimerCtrl__setControlB(uint8_t x)
+{
+  while (* (volatile uint8_t *)0xB6 & (1 << 0)) 
+    ;
+  * (volatile uint8_t *)0xB1 = ((Atm128_TCCR2B_t )x).flat;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerCtrl8.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlB(uint8_t control){
+  HplAtm1281Timer2AsyncP__TimerCtrl__setControlB(control);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline void HplAtm1281Timer2AsyncP__TimerCtrl__setControlA(uint8_t x)
+{
+  while (* (volatile uint8_t *)0xB6 & (1 << 1)) 
+    ;
+  * (volatile uint8_t *)0xB0 = ((Atm128_TCCR2A_t )x).flat;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerCtrl8.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlA(uint8_t control){
+  HplAtm1281Timer2AsyncP__TimerCtrl__setControlA(control);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline void HplAtm1281Timer2AsyncP__TimerAsync__setTimer2Asynchronous(void )
+{
+  * (volatile uint8_t *)0xB6 |= 1 << 5;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm128TimerAsync.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__setTimer2Asynchronous(void ){
+  HplAtm1281Timer2AsyncP__TimerAsync__setTimer2Asynchronous();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline error_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Init__init(void )
+{
+  /* atomic removed: atomic calls only */
+  {
+    Atm128_TCCR2A_t x;
+    Atm128_TCCR2B_t y;
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerAsync__setTimer2Asynchronous();
+    x.flat = 0;
+    x.bits.wgm21 = 1;
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlA(x.flat);
+    y.flat = 0;
+    y.bits.cs = 3;
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__setControlB(y.flat);
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__set(/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MAXT);
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__start();
+  }
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt();
+  return SUCCESS;
+}
+@@ TOSROOT/tos/interfaces/Init.nc
+inline static error_t RealMainP__SoftwareInit__init(void ){
+  unsigned char __nesc_result;
+  __nesc_result = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Init__init();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/lib/timer/Timer.nc
+inline static void BlinkC__Timer2__startPeriodic(uint32_t dt){
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(2U, dt);
+}
+inline static void BlinkC__Timer1__startPeriodic(uint32_t dt){
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(1U, dt);
+}
+inline static void BlinkC__Timer0__startPeriodic(uint32_t dt){
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(0U, dt);
+}
+@@ BlinkC.nc
+static inline void BlinkC__Boot__booted(void )
+{
+  BlinkC__Timer0__startPeriodic(250);
+  BlinkC__Timer1__startPeriodic(500);
+  BlinkC__Timer2__startPeriodic(1000);
+}
+@@ TOSROOT/tos/interfaces/Boot.nc
+inline static void RealMainP__Boot__booted(void ){
+  BlinkC__Boot__booted();
+}
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+inline static error_t /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask(void ){
+  unsigned char __nesc_result;
+  __nesc_result = SchedulerBasicP__TaskBasic__postTask(/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer);
+  return __nesc_result;
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__startTimer(uint8_t num, uint32_t t0, uint32_t dt, bool isoneshot)
+{
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer_t *timer = &/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__m_timers[num];
+  timer->t0 = t0;
+  timer->dt = dt;
+  timer->isoneshot = isoneshot;
+  timer->isrunning = TRUE;
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask();
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static inline void SchedulerBasicP__TaskBasic__default__runTask(uint8_t id)
+{
+}
+@@ TOSROOT/tos/interfaces/TaskBasic.nc
+inline static void SchedulerBasicP__TaskBasic__runTask(uint8_t arg_X){
+  switch (arg_X) {
+    case /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired:
+      /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__runTask();
+      break;
+    case /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer:
+      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__runTask();
+      break;
+    default:
+      SchedulerBasicP__TaskBasic__default__runTask(arg_X);
+      break;
+    }
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline mcu_power_t HplAtm1281Timer2AsyncP__McuPowerOverride__lowestState(void )
+{
+  uint8_t diff;
+  if (* (volatile uint8_t *)0x70 & ((1 << 1) | (1 << 0))) {
+      while (* (volatile uint8_t *)0xB6 & (((1 << 4) | (1 << 3)) | (1 << 1))) 
+        ;
+      diff = * (volatile uint8_t *)0xB3 - * (volatile uint8_t *)0xB2;
+      if (diff < EXT_STANDBY_T0_THRESHOLD || 
+      * (volatile uint8_t *)0xB2 > 256 - EXT_STANDBY_T0_THRESHOLD) {
+        return ATM128_POWER_EXT_STANDBY;
+        }
+      return ATM128_POWER_SAVE;
+    }
+  else {
+      return ATM128_POWER_DOWN;
+    }
+}
+@@ TOSROOT/tos/interfaces/McuPowerOverride.nc
+inline static mcu_power_t McuSleepC__McuPowerOverride__lowestState(void ){
+  unsigned char __nesc_result;
+  __nesc_result = HplAtm1281Timer2AsyncP__McuPowerOverride__lowestState();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/McuSleepC.nc
+static inline mcu_power_t McuSleepC__getPowerState(void )
+{
+  if ((
+  * (volatile uint8_t *)0x6E & ((1 << 1) | (1 << 2)) || 
+  * (volatile uint8_t *)0x6F & ((((1 << 5) | (1 << 1)) | (1 << 2)) | (1 << 3))) || 
+  * (volatile uint8_t *)0x71 & ((((1 << 5) | (1 << 1)) | (1 << 2)) | (1 << 3))) 
+    {
+      return ATM128_POWER_IDLE;
+    }
+  else {
+    if (* (volatile uint8_t *)(uint16_t )& * (volatile uint8_t *)(0x2C + 0x20) & (1 << 7)) {
+        return ATM128_POWER_IDLE;
+      }
+    else {
+      if (* (volatile uint8_t *)0XC1 & ((1 << 3) | (1 << 4))) {
+          return ATM128_POWER_IDLE;
+        }
+      else {
+        if (* (volatile uint8_t *)0XC9 & ((1 << 3) | (1 << 4))) {
+            return ATM128_POWER_IDLE;
+          }
+        else {
+          if (* (volatile uint8_t *)(uint16_t )& * (volatile uint8_t *)0xBC & (1 << 2)) {
+              return ATM128_POWER_IDLE;
+            }
+          else {
+            if (* (volatile uint8_t *)(uint16_t )& * (volatile uint8_t *)0x7A & (1 << 7)) {
+                return ATM128_POWER_ADC_NR;
+              }
+            else {
+                return ATM128_POWER_DOWN;
+              }
+            }
+          }
+        }
+      }
+    }
+}
+@@ TOSROOT/tos/chips/atm1281/atm128hardware.h
+static inline  mcu_power_t mcombine(mcu_power_t m1, mcu_power_t m2)
+{
+  return m1 < m2 ? m1 : m2;
+}
+@@ TOSROOT/tos/chips/atm1281/McuSleepC.nc
+static inline void McuSleepC__McuSleep__sleep(void )
+{
+  uint8_t powerState;
+  powerState = mcombine(McuSleepC__getPowerState(), McuSleepC__McuPowerOverride__lowestState());
+  * (volatile uint8_t *)(0x33 + 0x20) = ((
+  * (volatile uint8_t *)(0x33 + 0x20) & 0xf0) | (1 << 0)) | __extension__ ({
+    uint16_t __addr16 = (uint16_t )(uint16_t )&McuSleepC__atm128PowerBits[powerState];
+    uint8_t __result;
+     __asm volatile ("lpm %0,%a1" : "=r"(__result) : "z"(__addr16));__result;
+  }
+  );
+   __asm volatile ("sei" :  :  : "memory");
+   __asm volatile ("sleep" :  :  : "memory");
+   __asm volatile ("cli" :  :  : "memory");
+  * (volatile uint8_t *)(0x33 + 0x20) &= ~(1 << 0);
+}
+@@ TOSROOT/tos/interfaces/McuSleep.nc
+inline static void SchedulerBasicP__McuSleep__sleep(void ){
+  McuSleepC__McuSleep__sleep();
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static __inline uint8_t SchedulerBasicP__popTask(void )
+{
+  if (SchedulerBasicP__m_head != SchedulerBasicP__NO_TASK) 
+    {
+      uint8_t id = SchedulerBasicP__m_head;
+      SchedulerBasicP__m_head = SchedulerBasicP__m_next[SchedulerBasicP__m_head];
+      if (SchedulerBasicP__m_head == SchedulerBasicP__NO_TASK) 
+        {
+          SchedulerBasicP__m_tail = SchedulerBasicP__NO_TASK;
+        }
+      SchedulerBasicP__m_next[id] = SchedulerBasicP__NO_TASK;
+      return id;
+    }
+  else 
+    {
+      return SchedulerBasicP__NO_TASK;
+    }
+}
+static inline void SchedulerBasicP__Scheduler__taskLoop(void )
+{
+  for (; ; ) 
+    {
+      uint8_t nextTask;
+      { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+        {
+          while ((nextTask = SchedulerBasicP__popTask()) == SchedulerBasicP__NO_TASK) 
+            {
+              SchedulerBasicP__McuSleep__sleep();
+            }
+        }
+        __nesc_atomic_end(__nesc_atomic); }
+      SchedulerBasicP__TaskBasic__runTask(nextTask);
+    }
+}
+@@ TOSROOT/tos/interfaces/Scheduler.nc
+inline static void RealMainP__Scheduler__taskLoop(void ){
+  SchedulerBasicP__Scheduler__taskLoop();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static __inline void HplAtm1281Timer2AsyncP__stabiliseTimer2(void )
+{
+  * (volatile uint8_t *)0xB0 = * (volatile uint8_t *)0xB0;
+  while (* (volatile uint8_t *)0xB6 & (1 << 1)) 
+    ;
+}
+@@ TOSROOT/tos/lib/timer/CounterToLocalTimeC.nc
+static inline void /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__overflow(void )
+{
+}
+@@ TOSROOT/tos/lib/timer/Counter.nc
+inline static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__overflow(void ){
+  /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__overflow();
+}
+@@ TOSROOT/tos/chips/atm1281/atm128hardware.h
+static __inline  void __nesc_enable_interrupt()
+{
+   __asm volatile ("sei" :  :  : "memory");}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+static inline uint8_t HplAtm1281Timer2AsyncP__Compare__get(void )
+{
+  return * (volatile uint8_t *)0xB3;
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+inline static /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__size_type /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__get(void ){
+  unsigned char __nesc_result;
+  __nesc_result = HplAtm1281Timer2AsyncP__Compare__get();
+  return __nesc_result;
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__fired(void )
+{
+  int overflowed;
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base += /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__get() + 1U;
+  overflowed = !/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base;
+  __nesc_enable_interrupt();
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt();
+  if (overflowed) {
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__overflow();
+    }
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Compare.nc
+inline static void HplAtm1281Timer2AsyncP__Compare__fired(void ){
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__fired();
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static inline void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__overflow(void )
+{
+}
+@@ TOSROOT/tos/chips/atm128/timer/HplAtm128Timer.nc
+inline static void HplAtm1281Timer2AsyncP__Timer__overflow(void ){
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__overflow();
+}
+@@ TOSROOT/tos/system/RealMainP.nc
+  int main(void )
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      {
+        * (volatile uint8_t *)(0x34 + 0x20) = 0;
+        wdt_disable();
+      }
+      ;
+      RealMainP__Scheduler__init();
+      RealMainP__PlatformInit__init();
+      while (RealMainP__Scheduler__runNextTask()) ;
+      RealMainP__SoftwareInit__init();
+      while (RealMainP__Scheduler__runNextTask()) ;
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+  __nesc_enable_interrupt();
+  RealMainP__Boot__booted();
+  RealMainP__Scheduler__taskLoop();
+  return -1;
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static bool SchedulerBasicP__Scheduler__runNextTask(void )
+{
+  uint8_t nextTask;
+  /* atomic removed: atomic calls only */
+  {
+    nextTask = SchedulerBasicP__popTask();
+    if (nextTask == SchedulerBasicP__NO_TASK) 
+      {
+        {
+          unsigned char __nesc_temp = 
+          FALSE;
+          return __nesc_temp;
+        }
+      }
+  }
+  SchedulerBasicP__TaskBasic__runTask(nextTask);
+  return TRUE;
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__runTask(void )
+{
+  uint32_t now = /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__getNow();
+  int32_t min_remaining = (1UL << 31) - 1;
+  bool min_remaining_isset = FALSE;
+  uint16_t num;
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__stop();
+  for (num = 0; num < /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__NUM_TIMERS; num++) 
+    {
+      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer_t *timer = &/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__m_timers[num];
+      if (timer->isrunning) 
+        {
+          uint32_t elapsed = now - timer->t0;
+          int32_t remaining = timer->dt - elapsed;
+          if (remaining < min_remaining) 
+            {
+              min_remaining = remaining;
+              min_remaining_isset = TRUE;
+            }
+        }
+    }
+  if (min_remaining_isset) 
+    {
+      if (min_remaining <= 0) {
+        /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(now);
+        }
+      else {
+        /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__startOneShotAt(now, min_remaining);
+        }
+    }
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static uint32_t /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__get(void )
+{
+  uint32_t now;
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      uint8_t now8 = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get();
+      if (((Atm128_TIFR2_t )/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__getInterruptFlag()).bits.ocfa) {
+        now = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base + /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__get() + 1 + /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get();
+        }
+      else {
+        now = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base + now8;
+        }
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+  return now;
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(uint32_t now)
+{
+  uint16_t num;
+  for (num = 0; num < /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__NUM_TIMERS; num++) 
+    {
+      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer_t *timer = &/*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__m_timers[num];
+      if (timer->isrunning) 
+        {
+          uint32_t elapsed = now - timer->t0;
+          if (elapsed >= timer->dt) 
+            {
+              if (timer->isoneshot) {
+                timer->isrunning = FALSE;
+                }
+              else {
+                timer->t0 += timer->dt;
+                }
+              /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(num);
+              break;
+            }
+        }
+    }
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask();
+}
+@@ TOSROOT/tos/system/SchedulerBasicP.nc
+static error_t SchedulerBasicP__TaskBasic__postTask(uint8_t id)
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      {
+        unsigned char __nesc_temp = 
+        SchedulerBasicP__pushTask(id) ? SUCCESS : EBUSY;
+        {
+          __nesc_atomic_end(__nesc_atomic); 
+          return __nesc_temp;
+        }
+      }
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+}
+@@ TOSROOT/tos/chips/atm1281/timer/Atm1281AlarmAsyncP.nc
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__startAt(uint32_t nt0, uint32_t ndt)
+{
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__set = TRUE;
+      /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__t0 = nt0;
+      /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__dt = ndt;
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+  /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt();
+}
+static void /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setInterrupt(void )
+{
+  bool fired = FALSE;
+  { __nesc_atomic_t __nesc_atomic = __nesc_atomic_start();
+    {
+      uint8_t interrupt_in = 1 + /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Compare__get() - /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Timer__get();
+      uint8_t newOcr2A;
+      uint8_t tifr2 = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__TimerCtrl__getInterruptFlag();
+      ;
+      if ((interrupt_in != 0 && interrupt_in < /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MINDT) || tifr2 & (1 << 1)) {
+          if (interrupt_in < /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MINDT) {
+              ;
+            }
+          else {
+              ;
+            }
+          {
+            __nesc_atomic_end(__nesc_atomic); 
+            return;
+          }
+        }
+      if (!/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__set) {
+          newOcr2A = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MAXT;
+          ;
+        }
+      else 
+        {
+          uint32_t now = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Counter__get();
+          ;
+          if ((uint32_t )(now - /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__t0) >= /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__dt) 
+            {
+              /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__set = FALSE;
+              fired = TRUE;
+              newOcr2A = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MAXT;
+            }
+          else 
+            {
+              uint32_t alarm_in = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__t0 + /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__dt - /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__base;
+              if (alarm_in > /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MAXT) {
+                newOcr2A = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MAXT;
+                }
+              else {
+                if ((uint8_t )alarm_in < /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MINDT) {
+                  newOcr2A = /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__MINDT;
+                  }
+                else {
+                  newOcr2A = alarm_in;
+                  }
+                }
+            }
+        }
+      newOcr2A--;
+      /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__setOcr2A(newOcr2A);
+    }
+    __nesc_atomic_end(__nesc_atomic); }
+  if (fired) {
+    /*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm1281AlarmAsyncP*/Atm1281AlarmAsyncP__0__Alarm__fired();
+    }
+}
+@@ TOSROOT/tos/lib/timer/AlarmToTimerC.nc
+static void /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__fired__runTask(void )
+{
+  if (/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_oneshot == FALSE) {
+    /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__start(/*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Alarm__getAlarm(), /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__m_dt, FALSE);
+    }
+  /*HilTimerMilliC.AlarmToTimerC*/AlarmToTimerC__0__Timer__fired();
+}
+@@ TOSROOT/tos/lib/timer/VirtualizeTimerC.nc
+static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(uint8_t num, uint32_t dt)
+{
+  /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__startTimer(num, /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__getNow(), dt, FALSE);
+}
+@@ TOSROOT/tos/chips/atm1281/timer/HplAtm1281Timer2AsyncP.nc
+__attribute((signal))   void __vector_13(void )
+{
+  HplAtm1281Timer2AsyncP__stabiliseTimer2();
+  HplAtm1281Timer2AsyncP__Compare__fired();
+}
+__attribute((signal))   void __vector_15(void )
+{
+  HplAtm1281Timer2AsyncP__stabiliseTimer2();
+  HplAtm1281Timer2AsyncP__Timer__overflow();
+}

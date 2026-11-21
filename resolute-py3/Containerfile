@@ -1,17 +1,14 @@
 # TinyOS 2.1.2 + TOSSIM toolchain on Ubuntu 26.04 (resolute), 64-bit, Python 3.14.
 #
-# Same TinyOS as jammy-py3 (tossim-py3 branch of afbranco/tinyos-main, README.md "Python 3"),
-# with the fixes of README.md. New here: GCC 15 (no GCC 10 in 26.04), hence fixes 9 to 11.
+# TinyOS from the 2.1.2-maintained branch of afbranco/tinyos-main (README.md, "TinyOS changes"),
+# with the fixes of README.md. New here: GCC 15 (no GCC 10 in 26.04), hence fixes 9 to 11, and
+# AVR mote builds (micaz, iris, mica2), fixes 12 and 13.
 #
 #   podman build -t tinyos-toolchain:2.1.2-resolute-py3 -f resolute-py3/Containerfile .
 FROM docker.io/library/ubuntu:26.04
 
 ARG NESC_TAG=v1.4.0
 ARG NESC_SHA256=ea9a505d55e122bf413dff404bebfa869a8f0dd76a01a8efc7b4919c375ca000
-# Commit da2f9d0 of afbranco/tinyos-main, branch tossim-py3 (parent: release_tinyos_2_1_2).
-ARG TINYOS_REPO=afbranco/tinyos-main
-ARG TINYOS_COMMIT=da2f9d0eb07f629f612b8c2e57aee9374d63a531
-ARG TINYOS_SHA256=a225958e96c121a1b178cc83fea91c9713381854efc3b780d96db3207878dc56
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -36,6 +33,12 @@ RUN curl -fsSL -o /tmp/nesc.tar.gz https://codeload.github.com/tinyos/nesc/tar.g
  && rm -rf /tmp/nesc /tmp/nesc.tar.gz
 
 # TinyOS 2.1.2 with the Python 3 TOSSIM bindings, plus the tools the make system needs.
+# Declared here, not at the top: a new fork commit then rebuilds only from this step on.
+# Commit fc2953f of afbranco/tinyos-main, branch 2.1.2-maintained: release_tinyos_2_1_2 + Python 3
+# bindings (da2f9d0) + upstream cbbddf66 (AVR progmem consts with newer gcc).
+ARG TINYOS_REPO=afbranco/tinyos-main
+ARG TINYOS_COMMIT=fc2953f5debb89ec20ea1162df8ff85304d27e0f
+ARG TINYOS_SHA256=f7125717662a4ffb2ac1c079e3e0cd0a0301f5bd7ef3300154dfaffa9bb2d18d
 ENV TOSROOT=/opt/tinyos-2.1.2
 RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/tar.gz/${TINYOS_COMMIT} \
  && echo "${TINYOS_SHA256}  /tmp/tinyos.tar.gz" | sha256sum -c - \
@@ -45,7 +48,8 @@ RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/
  && for d in tinyos/ncc tinyos/misc; do make -C $d && make -C $d install || exit 1; done
 
 # Fixes 10 and 11: a gcc wrapper that sets the C dialect for TinyOS builds (see the file).
-COPY resolute-py3/gcc /usr/local/bin/gcc
+# Fixes 12 and 13: an avr-gcc wrapper for nesC's AVR builds (see the file).
+COPY resolute-py3/gcc resolute-py3/avr-gcc /usr/local/bin/
 
 # Fix 7: sim.extra only parses "Python 2.x" versions, so set it. Fix 5 and fix 8: as in
 # jammy-py2. No PYTHONPATH: the TinyOS Python SDK (support/sdk/python) is Python 2 code.

@@ -1,0 +1,35 @@
+#!/bin/sh
+# Installed as /usr/local/bin/avr-gcc, ahead of /usr/bin/avr-gcc (GCC 14) in PATH. Only the
+# call that runs nesC (ncc passes -specs=.../tdspecs) is changed; every other call goes
+# straight to avr-gcc. See README.md, fixes 12 and 13.
+#
+# Fix 12: since avr-gcc 5, the driver reads a per-device specs file and hands the compiler
+# (nesC, here) -mmcu=<architecture> (avr51) instead of -mmcu=<device> (atmega128). nesC reads
+# the predefined macros with that architecture, so the device macros (__AVR_ATmega128__ & co.)
+# are missing and <avr/io.h> declares no registers. Pass them explicitly: the macros that
+# "-mmcu=<device>" defines and its architecture does not.
+#
+# Fix 13: avr-gcc defines __INT24_MAX__, and avr-libc then declares functions on __int24,
+# a type nesC does not know. Undefine it for nesC (TinyOS does not use those functions).
+real=/usr/bin/avr-gcc
+case " $* " in
+  *" -specs="*tdspecs*) ;;
+  *) exec "$real" "$@" ;;
+esac
+mcu=
+for a in "$@"; do
+  case "$a" in -mmcu=avr*) ;; -mmcu=*) mcu=${a#-mmcu=} ;; esac
+done
+[ -n "$mcu" ] || exec "$real" "$@"
+# The -m options the specs file turns -mmcu=<device> into (e.g. -mdouble=32 -mlong-double=64
+# -mmcu=avr51), as the driver reports them: that is what nesC is given.
+archopts=$("$real" -mmcu="$mcu" -v -x c /dev/null -E 2>&1 | grep '^COLLECT_GCC_OPTIONS=' | tail -1 \
+  | tr ' ' '\n' | sed -n "s/^'\(-m[^']*\)'$/\1/p" | awk '!/^-mmcu=/ || /^-mmcu=avr[0-9]/' | tr '\n' ' ')
+tmp=$(mktemp -d)
+"$real" -mmcu="$mcu" -E -dM -x c /dev/null | sort > "$tmp/dev"
+# shellcheck disable=SC2086
+"$real" $archopts -E -dM -x c /dev/null | sort > "$tmp/arch"
+defs=$(comm -23 "$tmp/dev" "$tmp/arch" | sed -n 's/^#define \([A-Za-z0-9_]*\) \(.*\)$/-D\1=\2/p')
+rm -rf "$tmp"
+# The macro values are single words (1, atmega128), so word splitting of $defs is safe.
+exec "$real" "$@" $defs -U__INT24_MAX__

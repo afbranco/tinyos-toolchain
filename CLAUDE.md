@@ -29,7 +29,8 @@ ficam as decisões e o modo de trabalhar.
   (MSP430, ARM...) está fora: exigiria portar o TinyOS. Novas plataformas (ex.: nRF52) e portar
   o Terra são assuntos para depois, o segundo na sessão Terra.
 - O TinyOS vem do oficial (`tinyos/tinyos-main`, tag `release_tinyos_2_1_2`), conferido por
-  SHA-256. Alterações no TinyOS ficam no fork `afbranco/tinyos-main`, branch **`tossim-py3`**,
+  SHA-256. Alterações no TinyOS ficam no fork `afbranco/tinyos-main`, branch **`2.1.2-maintained`**
+  (renomeada de `tossim-py3` em 2026-11-21, aprovado pelo Prof.),
   criada a partir da tag 2.1.2 (o `master` do fork é cópia de 2017 e não serve de base). Clone
   local raso em `~/tinyos-main`. O `resolute-py3` fixa o commit da branch e o SHA-256 do tarball:
   commit novo na branch exige atualizar os dois no Containerfile.
@@ -55,12 +56,14 @@ código em produção é anterior ao publicado.
 
 ## Próximo passo técnico
 
-AVR, começando pelo micaz (Blink, RadioCountToLeds), na `resolute-py3`. Erros já vistos: o nesC
-não conhece o `__int24` do avr-gcc 14; no jammy, `ASSR` e outros registradores "não declarados"
-(provavelmente a seleção do cabeçalho pelo `-mmcu`, já que o nesC só repassa opções `-m`). O
-oficial `tinyos-main` tem 935 commits depois da 2.1.2, alguns de compatibilidade com avr-gcc
-novo (ex.: `cbbddf66`): trazer para o fork citando a origem. Testar o firmware no Avrora.
-Depois, o oráculo de equivalência (fixar a semente com `randomSeed`).
+AVR (2026-11-21): Blink e RadioCountToLeds compilam para micaz, iris e mica2 na `resolute-py3`
+(correções 12 e 13 no invólucro `resolute-py3/avr-gcc` + `cbbddf66` do oficial no fork). Falta
+rodar o firmware no **Avrora** (simulador AVR em Java) para provar que funciona sem mote.
+
+64 bits: a varredura de avisos do GCC nos builds TOSSIM não acha conversão ponteiro/inteiro.
+O Prof. lembra de um problema de 64 bits identificado na VM do Terra, numa sessão TerraSim
+anterior: perguntado à sessão TerraSim em 2026-11-21, resposta pendente. Os `.so` publicados do
+Terra são todos i386. Depois: oráculo de equivalência (fixar a semente com `randomSeed`).
 
 ## Como trabalhar
 
