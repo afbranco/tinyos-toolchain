@@ -22,12 +22,16 @@ ficam as decisões e o modo de trabalhar.
 
 - Repositório **público** `afbranco/tinyos-toolchain`, licença **BSD 3-Clause** (aprovados pelo
   Prof.; criado em 2026-11-21).
-- Releases = **tags da imagem**: `2.1.2-jammy-py2`, `2.1.2-jammy-py3` e `2.1.2-resolute-py3`
-  (Ubuntu 26.04: a de longo prazo).
+- Releases = **tags da imagem**. Mantida: `2.1.2-resolute-py3` (Ubuntu 26.04). Congelada:
+  `2.1.2-jammy-py2` (não recebe trabalho novo). O `jammy-py3` foi retirado (2026-11-21).
+- **Escopo** (2026-11-21, decidido pelo Prof.): o compromisso é o TOSSIM, para o Terra. AVR
+  (micaz, iris, mica2) entra com prazo limitado e só se cada correção for pequena. O resto
+  (MSP430, ARM...) está fora: exigiria portar o TinyOS. Novas plataformas (ex.: nRF52) e portar
+  o Terra são assuntos para depois, o segundo na sessão Terra.
 - O TinyOS vem do oficial (`tinyos/tinyos-main`, tag `release_tinyos_2_1_2`), conferido por
   SHA-256. Alterações no TinyOS ficam no fork `afbranco/tinyos-main`, branch **`tossim-py3`**,
   criada a partir da tag 2.1.2 (o `master` do fork é cópia de 2017 e não serve de base). Clone
-  local raso em `~/tinyos-main`. O `jammy-py3` fixa o commit da branch e o SHA-256 do tarball:
+  local raso em `~/tinyos-main`. O `resolute-py3` fixa o commit da branch e o SHA-256 do tarball:
   commit novo na branch exige atualizar os dois no Containerfile.
 - Python 3 (2026-11-21, aprovado pelo Prof.): um único commit com os wrappers regerados pelo
   SWIG 4.0.2 e **commitados** (a imagem não precisa de SWIG); o mesmo fonte serve Python 2.7 e 3.
@@ -51,15 +55,20 @@ código em produção é anterior ao publicado.
 
 ## Próximo passo técnico
 
-`resolute-py3` (Ubuntu 26.04.1, GCC 15, Python 3.14) passa (2026-11-21), com as correções 9 a 11
-do README (nesC em gnu89 e o invólucro `resolute-py3/gcc`). Escolhido no lugar do 24.04 pelo
-Prof. (suporte até 2031). Pendente: decidir se o `jammy-*` também ganha a correção 9 (o bug do
-`U"..."` já existia lá, só como aviso). Depois, o oráculo de equivalência (fixar a semente com
-`randomSeed`: por padrão ela vem do relógio).
+AVR, começando pelo micaz (Blink, RadioCountToLeds), na `resolute-py3`. Erros já vistos: o nesC
+não conhece o `__int24` do avr-gcc 14; no jammy, `ASSR` e outros registradores "não declarados"
+(provavelmente a seleção do cabeçalho pelo `-mmcu`, já que o nesC só repassa opções `-m`). O
+oficial `tinyos-main` tem 935 commits depois da 2.1.2, alguns de compatibilidade com avr-gcc
+novo (ex.: `cbbddf66`): trazer para o fork citando a origem. Testar o firmware no Avrora.
+Depois, o oráculo de equivalência (fixar a semente com `randomSeed`).
 
 ## Como trabalhar
 
-- **Testar antes de publicar**: `tests/smoke.sh` dentro da imagem tem de dar `ALL PASS`.
+- **Testar antes de publicar**: `tests/smoke.sh` dentro da imagem tem de dar `ALL PASS`. Ele
+  inclui o teste do C gerado (`tests/ref/`): é o mapa de impacto de qualquer mudança no fork ou
+  na toolchain. Mudança intencional: regerar as referências e commitar junto, explicando.
+- `PFLAGS` vai pelo **ambiente**, nunca na linha de comando do `make`: na linha de comando ele
+  anula o `PFLAGS +=` do `sim.extra` e o build deixa de ser de simulação.
 - **Teste novo só vale depois de reprovar com a mudança desfeita** (mutar o teste).
 - A máquina é a do Prof.: builds pesados com `nice -n 19`, e avisar antes de carga grande.
 - Matar processo só por PID. Restaurar a partir de cópias, nunca `git checkout`/`restore`/`stash`

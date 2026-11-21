@@ -9,18 +9,28 @@ The first consumer is [Terra](https://github.com/afbranco/Terra), whose VM runs 
 through it the [TerraSim](https://github.com/afbranco/TerraSim) classroom simulator. Nothing here
 depends on Terra: the tests use stock TinyOS apps.
 
+## Scope
+
+- **Supported: TOSSIM** (`make micaz sim` and `make micaz sim-sf`), which is what Terra needs.
+  This is what the images build and the tests check.
+- **Next, time-boxed: AVR motes** (micaz, iris, mica2), with the Avrora simulator as the test.
+  It stays only if each fix stays small; otherwise it is dropped and the reason written here.
+- **Out of scope:** the other TinyOS 2.1.2 platforms (MSP430, ARM, XScale, M16C). Their old
+  compilers are gone (for MSP430, TI's current `msp430-elf` GCC is not compatible with the
+  mspgcc TinyOS was written for), so supporting them means porting TinyOS, not building it.
+
 ## Status
 
-| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` |
-|---|---|---|---|---|
-| `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ |
-| `2.1.2-jammy-py3` | Ubuntu 22.04, x86_64 | 3.10 | ✅ | ✅ |
-| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ |
+| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | |
+|---|---|---|---|---|---|
+| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | **maintained** |
+| `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ | frozen |
 
-Ubuntu 22.04 is the **last** Ubuntu that ships Python 2.7, and its standard support ends in April
-2027. `jammy-py2` is a bridge, not a destination. `resolute-py3` (Ubuntu 26.04 LTS, supported
-until 2031) is the long-term one; `jammy-py3` stays as the closest Python 3 image to the old
-toolchain (same compiler as `jammy-py2`).
+`resolute-py3` (Ubuntu 26.04 LTS, supported until 2031) is the one image that gets new work.
+`jammy-py2` is **frozen**: kept, unchanged, as a bridge for Python 2 code and as the reference
+closest to the old toolchain. Ubuntu 22.04 is the last Ubuntu with Python 2.7, and its standard
+support ends in April 2027. (A `jammy-py3` image existed for the Python 3 step; it was removed
+once `resolute-py3` passed, and is in the git history.)
 
 ## Quick start
 
@@ -36,7 +46,7 @@ podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-resolute-py3 make 
 ```
 
 Sources are fetched at fixed versions, checked by SHA-256:
-[tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0` (both images), and TinyOS from
+[tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0`, and TinyOS from
 [tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2`
 (`jammy-py2`) or from the `tossim-py3` branch of
 [afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/tossim-py3) (`*-py3`):
@@ -46,8 +56,9 @@ the same tag plus one commit, described below. The official repositories are arc
 ## The eight fixes
 
 Each one was hit, in this order, while building `RadioCountToLeds` and `BaseStation` for TOSSIM
-on Ubuntu 22.04 with Python 2.7. None of them edits a TinyOS file. `jammy-py3` applies the same
-fixes, with `python-is-python3` for fix 1 and `PYTHON_VERSION=3.10` for fix 7.
+on Ubuntu 22.04 with Python 2.7. None of them edits a TinyOS file. `resolute-py3` applies them
+too, with `python-is-python3` for fix 1, `PYTHON_VERSION=3.14` for fix 7, and fix 11 instead of
+fix 6.
 
 | # | Symptom | Cause | Fix |
 |---|---|---|---|
@@ -93,7 +104,7 @@ What changes for a user of the Python API:
 - **`getVariable()`** returns `int` / `float`, or `bytes` for raw memory; the variable list given
   to `Tossim()` uses `str`.
 - **The TinyOS Python SDK** (`support/sdk/python`: `tinyos.tossim.TossimApp`, `NescApp`, the
-  packet tools) is Python 2 code and is **not** ported; `jammy-py3` does not put it on
+  packet tools) is Python 2 code and is **not** ported; `resolute-py3` does not put it on
   `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
   a hand-written variable list.
 
@@ -118,6 +129,14 @@ apps and runs them:
   the variable list, `setData()`/`data()` with binary bytes, and a file added twice to a
   channel getting each line once. Each check was seen to fail with its part of the binding
   change undone.
+- **Generated C** (every build): nesC's output for the app (`simbuild/micaz/app.c`) is
+  normalized by `tests/gen_c_norm.awk` and must match `tests/ref/<app>-<target>.txt`. The
+  normalization keeps only code from TinyOS and the app (system headers change with every apt
+  update), so this checks that a toolchain or fork change did not change the code being
+  simulated. On a difference it lists the source files the changed code comes from. Today the
+  references match in both images: the official TinyOS (`jammy-py2`, GCC 10) and the
+  `tossim-py3` fork with GCC 15 (`resolute-py3`) generate the same code. After an intended
+  change, regenerate the references with `GEN_C_UPDATE=<writable dir>` and commit them with it.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit
 build. Equivalence needs a trace comparison against the original toolchain (see Roadmap).
@@ -126,10 +145,11 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 - `mig` (message classes for Java/Python) with nesC 1.4.0. The tests skip it with
   `BUILD_EXTRA_DEPS=`; it is not needed for the TOSSIM `.so`.
-- Mote targets (real hardware). Out of scope for now.
+- Mote targets (real hardware): see "Scope".
 
 ## Roadmap
 
-1. ~~**Python 3**~~: done in `jammy-py3` (see "Python 3").
+1. ~~**Python 3**~~: done (see "Python 3").
 2. ~~**A current Ubuntu**~~: done in `resolute-py3` (26.04 LTS).
-3. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.
+3. **AVR motes** (see "Scope").
+4. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.
