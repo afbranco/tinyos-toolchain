@@ -13,25 +13,29 @@ ficam as decisões e o modo de trabalhar.
 - Três projetos em cadeia, cada um consumindo o anterior como artefato pronto:
   1. **tinyos-toolchain** (este): só o toolchain, sem nada de Terra.
   2. **Terra** (`afbranco/Terra`): compila a VM dentro desta imagem e publica releases do
-     `_TOSSIMmodule.so`. Expectativa do Prof.: o Terra não precisará de adaptação.
+     `_TOSSIMmodule.so`. Expectativa do Prof.: o Terra não precisará de adaptação. Atenção: no
+     Python 3 o módulo se chama `_TOSSIM.so`, então quem publica ou copia o `.so` muda o nome.
   3. **TerraSim** (`~/TerraSim`): troca o `.so` vendorizado por uma release do Terra, depois de
      passar por um oráculo de equivalência.
 
 ## Decisões já tomadas (2026-11-19)
 
-- Repositório **público** `afbranco/tinyos-toolchain` (aprovado pelo Prof.; ainda **não criado**
-  no GitHub quando este arquivo foi escrito: criar a partir desta pasta).
-- Releases = **tags da imagem**: `2.1.2-jammy-py2` (feito), depois `2.1.2-<ubuntu>-py3`.
+- Repositório **público** `afbranco/tinyos-toolchain`, licença **BSD 3-Clause** (aprovados pelo
+  Prof.; criado em 2026-11-21).
+- Releases = **tags da imagem**: `2.1.2-jammy-py2` e `2.1.2-jammy-py3` (feitos), depois
+  `2.1.2-noble-py3`.
 - O TinyOS vem do oficial (`tinyos/tinyos-main`, tag `release_tinyos_2_1_2`), conferido por
-  SHA-256. O fork `afbranco/tinyos-main` é uma cópia pura do `master` de 2017 (0 commits
-  próprios, 36 atrás): **não serve de base como está**. Ele entra quando a primeira alteração no
-  TinyOS for necessária (provavelmente o SWIG 4 do Python 3), numa **branch criada a partir da
-  tag 2.1.2**, não do `master`.
+  SHA-256. Alterações no TinyOS ficam no fork `afbranco/tinyos-main`, branch **`tossim-py3`**,
+  criada a partir da tag 2.1.2 (o `master` do fork é cópia de 2017 e não serve de base). Clone
+  local raso em `~/tinyos-main`. O `jammy-py3` fixa o commit da branch e o SHA-256 do tarball:
+  commit novo na branch exige atualizar os dois no Containerfile.
+- Python 3 (2026-11-21, aprovado pelo Prof.): um único commit com os wrappers regerados pelo
+  SWIG 4.0.2 e **commitados** (a imagem não precisa de SWIG); o mesmo fonte serve Python 2.7 e 3.
+  O módulo passou a `_TOSSIM.so`; `setData`/`data()` usam `bytes` no Python 3. A SDK Python do
+  TinyOS (`support/sdk/python`) continua só Python 2 e não foi portada.
 
 ## Pendências para decidir com o Prof.
 
-- **Licença** do repositório (o TinyOS é BSD). Sem licença, um repositório público fica "todos
-  os direitos reservados".
 - **Inventário da `.ova`** (Ubuntu 12.04 com o ambiente antigo do Prof.): ele tem alterações não
   testadas, e elas podem estar dentro de `/opt/tinyos-2.1.2` na VM, além do Terra. Comparar a
   árvore de lá com a tag oficial; diferenças viram os primeiros commits da branch do fork. O
@@ -47,10 +51,9 @@ código em produção é anterior ao publicado.
 
 ## Próximo passo técnico
 
-Python 3: regerar os bindings com SWIG 4 a partir de `tos/lib/tossim/tossim.i`,
-`tos/lib/tossim/sf/SerialForwarder.i` e `sf/Throttle.i`, e adaptar `sim.extra`/`sim-sf.extra`
-(Python 3 muda `Py_InitModule`, strings e o nome da biblioteca). Começar no 22.04 (`jammy-py3`),
-depois tentar o 24.04.
+Ubuntu 24.04 (`noble-py3`, Python 3.12): conferir se o GCC 10 ainda existe no apt (fix 6) e se os
+wrappers do SWIG 4.0.2 compilam com o Python 3.12. Depois, o oráculo de equivalência (fixar a
+semente com `randomSeed`: por padrão ela vem do relógio).
 
 ## Como trabalhar
 

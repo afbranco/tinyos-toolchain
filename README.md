@@ -14,33 +14,38 @@ depends on Terra: the tests use stock TinyOS apps.
 | Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` |
 |---|---|---|---|---|
 | `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ |
-| `2.1.2-*-py3` (next) | Ubuntu 22.04 or 24.04 | 3.x | | |
+| `2.1.2-jammy-py3` | Ubuntu 22.04, x86_64 | 3.10 | ✅ | ✅ |
+| `2.1.2-noble-py3` (next) | Ubuntu 24.04 | 3.12 | | |
 
 Ubuntu 22.04 is the **last** Ubuntu that ships Python 2.7, and its standard support ends in April
-2027. `jammy-py2` is a bridge, not a destination: the next milestone is Python 3.
+2027. `jammy-py2` is a bridge, not a destination: `jammy-py3` is the one to move to.
 
 ## Quick start
 
 ```bash
-podman build -t tinyos-toolchain:2.1.2-jammy-py2 -f jammy-py2/Containerfile .
-podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-jammy-py2 bash /tests/smoke.sh
+podman build -t tinyos-toolchain:2.1.2-jammy-py3 -f jammy-py3/Containerfile .
+podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-jammy-py3 bash /tests/smoke.sh
 ```
 
 Building an app of your own:
 
 ```bash
-podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-jammy-py2 make micaz sim-sf
+podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-jammy-py3 make micaz sim-sf
 ```
 
-Sources are fetched from the official repositories at fixed tags, checked by SHA-256:
-[tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2` and
-[tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0`. Both repositories are archived
+Sources are fetched at fixed versions, checked by SHA-256:
+[tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0` (both images), and TinyOS from
+[tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2`
+(`jammy-py2`) or from the `tossim-py3` branch of
+[afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/tossim-py3) (`jammy-py3`):
+the same tag plus one commit, described below. The official repositories are archived
 (read-only).
 
 ## The eight fixes
 
 Each one was hit, in this order, while building `RadioCountToLeds` and `BaseStation` for TOSSIM
-on Ubuntu 22.04. None of them edits a TinyOS file.
+on Ubuntu 22.04 with Python 2.7. None of them edits a TinyOS file. `jammy-py3` applies the same
+fixes, with `python-is-python3` for fix 1 and `PYTHON_VERSION=3.10` for fix 7.
 
 | # | Symptom | Cause | Fix |
 |---|---|---|---|
@@ -53,14 +58,51 @@ on Ubuntu 22.04. None of them edits a TinyOS file.
 | 7 | `Python.h: No such file` | `sim.extra` turns `Python 2.7.18` into `2.78` (its `sed` expects a one-digit patch) | `PYTHON_VERSION=2.7` |
 | 8 | `undefined symbol: __nesc_atomic_end` on import | GCC ≥ 5 defaults to C99 `inline`: a non-static inline function emits no code | `-fgnu89-inline` |
 
+## Python 3
+
+Python 3 needs new TOSSIM bindings, so this is the one step that changes TinyOS. The change is a
+single commit on top of `release_tinyos_2_1_2`, on the
+[`tossim-py3`](https://github.com/afbranco/tinyos-main/tree/tossim-py3) branch of
+afbranco/tinyos-main. The wrappers (`tossim_wrap.cxx`, `TOSSIM.py`, in `tos/lib/tossim` and
+`tos/lib/tossim/sf`) are regenerated with **SWIG 4.0.2** and committed, so the image does not
+need SWIG. The same sources still build for Python 2.7 (the tests pass on both).
+
+What changes for a user of the Python API:
+
+- **The module is `_TOSSIM.so`**, not `_TOSSIMmodule.so`: Python 3 does not import
+  `<name>module.so`. Anything that ships or copies the `.so` must use the new name.
+- **`Packet.setData()` / `SerialPacket.setData()` take `bytes`**, and `data()` returns `bytes`
+  of `length()`. (Python 2 keeps the old behaviour: a `str`, cut at the first zero byte.)
+- **`addChannel(name, file)`** takes any Python file with a descriptor. The binding keeps one
+  `FILE*` per descriptor, so a file added to several channels still gets each line once.
+- **`getVariable()`** returns `int` / `float`, or `bytes` for raw memory; the variable list given
+  to `Tossim()` uses `str`.
+- **The TinyOS Python SDK** (`support/sdk/python`: `tinyos.tossim.TossimApp`, `NescApp`, the
+  packet tools) is Python 2 code and is **not** ported; `jammy-py3` does not put it on
+  `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
+  a hand-written variable list.
+
+## Known issues (also in the original TinyOS 2.1.2)
+
+- **`removeChannel()` does nothing.** `sim_log_remove_channel` never rebuilds the output table
+  (`sim_log_commit_change`) and always returns `True`. Do not close a file that TOSSIM still
+  writes to.
+- **Runs are not repeatable by default**: the random seed comes from the clock
+  (`gettimeofday`). Call `t.randomSeed(n)` to fix it.
+
 ## Tests
 
-`tests/smoke.sh` builds two stock apps and runs them:
+`tests/smoke.sh` runs with the image's Python (`python$PYTHON_VERSION`). It builds two stock
+apps and runs them:
 
 - **RadioCountToLeds**, `make micaz sim`: 2 motes for 20 simulated seconds; passes if simulated
   time reaches 20 s and mote 2 receives packets.
 - **BaseStation**, `make micaz sim-sf`: boots 2 motes and checks the SerialForwarder handshake
   (`"U "`) on TCP port 9002.
+- **API check** (`tests/api_check.py`, on the RadioCountToLeds build): `getVariable()` through
+  the variable list, `setData()`/`data()` with binary bytes, and a file added twice to a
+  channel getting each line once. Each check was seen to fail with its part of the binding
+  change undone.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit
 build. Equivalence needs a trace comparison against the original toolchain (see Roadmap).
@@ -73,10 +115,6 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 ## Roadmap
 
-1. **Python 3.** Regenerate the TOSSIM bindings with SWIG 4 from the interface files already in
-   the tree (`tos/lib/tossim/tossim.i`, `sf/SerialForwarder.i`, `sf/Throttle.i`). This is the
-   first step that changes TinyOS files: it will live on a branch of
-   [afbranco/tinyos-main](https://github.com/afbranco/tinyos-main) created **from the
-   `release_tinyos_2_1_2` tag**, and this toolchain will point at it.
-2. **Ubuntu 24.04**, once Python 2 is gone (nesC 1.4.0 already builds from source).
+1. ~~**Python 3**~~: done in `jammy-py3` (see "Python 3").
+2. **Ubuntu 24.04** (`noble-py3`), now that Python 2 is not needed.
 3. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.
