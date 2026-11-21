@@ -1,0 +1,19 @@
+#!/bin/sh
+# Installed as /usr/local/bin/gcc, ahead of /usr/bin/gcc (GCC 15) in PATH. TinyOS's make
+# system calls plain "gcc" (sim.extra: GCC=gcc, -fnesc-gcc=gcc), and nesC only forwards -m
+# options to it, so this is where the C dialect can be set. See README.md, fixes 10 and 11.
+#
+# Fix 10: GCC 15 defaults to C23. Its headers then use nullptr, and glibc turns strrchr & co.
+# into _Generic macros: nesC's parser (C99 era) knows neither. Use gnu17, the jammy default.
+#
+# Fix 11 (replaces fix 6, as there is no GCC 10 here): nesC reads gcc's predefined macros
+# with "gcc -E -dM", and with GCC >= 11 glibc tags fopen & co. with __attr_dealloc(fclose).
+# nesC drops the unused fclose declaration but keeps the attribute, so the C it generates does
+# not compile. For that query only, report GCC 10: nesC then sees the headers as it did with
+# GCC 10 on jammy. The generated C is still compiled by GCC 15.
+for a in "$@"; do
+  if [ "$a" = "-dM" ]; then
+    exec /usr/bin/gcc -std=gnu17 "$@" -U__GNUC__ -D__GNUC__=10 -U__GNUC_MINOR__ -D__GNUC_MINOR__=5
+  fi
+done
+exec /usr/bin/gcc -std=gnu17 "$@"

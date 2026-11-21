@@ -22,8 +22,8 @@ ficam as decisões e o modo de trabalhar.
 
 - Repositório **público** `afbranco/tinyos-toolchain`, licença **BSD 3-Clause** (aprovados pelo
   Prof.; criado em 2026-11-21).
-- Releases = **tags da imagem**: `2.1.2-jammy-py2` e `2.1.2-jammy-py3` (feitos), depois
-  `2.1.2-noble-py3`.
+- Releases = **tags da imagem**: `2.1.2-jammy-py2`, `2.1.2-jammy-py3` e `2.1.2-resolute-py3`
+  (Ubuntu 26.04: a de longo prazo).
 - O TinyOS vem do oficial (`tinyos/tinyos-main`, tag `release_tinyos_2_1_2`), conferido por
   SHA-256. Alterações no TinyOS ficam no fork `afbranco/tinyos-main`, branch **`tossim-py3`**,
   criada a partir da tag 2.1.2 (o `master` do fork é cópia de 2017 e não serve de base). Clone
@@ -51,9 +51,11 @@ código em produção é anterior ao publicado.
 
 ## Próximo passo técnico
 
-Ubuntu 24.04 (`noble-py3`, Python 3.12): conferir se o GCC 10 ainda existe no apt (fix 6) e se os
-wrappers do SWIG 4.0.2 compilam com o Python 3.12. Depois, o oráculo de equivalência (fixar a
-semente com `randomSeed`: por padrão ela vem do relógio).
+`resolute-py3` (Ubuntu 26.04.1, GCC 15, Python 3.14) passa (2026-11-21), com as correções 9 a 11
+do README (nesC em gnu89 e o invólucro `resolute-py3/gcc`). Escolhido no lugar do 24.04 pelo
+Prof. (suporte até 2031). Pendente: decidir se o `jammy-*` também ganha a correção 9 (o bug do
+`U"..."` já existia lá, só como aviso). Depois, o oráculo de equivalência (fixar a semente com
+`randomSeed`: por padrão ela vem do relógio).
 
 ## Como trabalhar
 

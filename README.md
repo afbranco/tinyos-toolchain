@@ -15,29 +15,31 @@ depends on Terra: the tests use stock TinyOS apps.
 |---|---|---|---|---|
 | `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ |
 | `2.1.2-jammy-py3` | Ubuntu 22.04, x86_64 | 3.10 | ✅ | ✅ |
-| `2.1.2-noble-py3` (next) | Ubuntu 24.04 | 3.12 | | |
+| `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ |
 
 Ubuntu 22.04 is the **last** Ubuntu that ships Python 2.7, and its standard support ends in April
-2027. `jammy-py2` is a bridge, not a destination: `jammy-py3` is the one to move to.
+2027. `jammy-py2` is a bridge, not a destination. `resolute-py3` (Ubuntu 26.04 LTS, supported
+until 2031) is the long-term one; `jammy-py3` stays as the closest Python 3 image to the old
+toolchain (same compiler as `jammy-py2`).
 
 ## Quick start
 
 ```bash
-podman build -t tinyos-toolchain:2.1.2-jammy-py3 -f jammy-py3/Containerfile .
-podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-jammy-py3 bash /tests/smoke.sh
+podman build -t tinyos-toolchain:2.1.2-resolute-py3 -f resolute-py3/Containerfile .
+podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-resolute-py3 bash /tests/smoke.sh
 ```
 
 Building an app of your own:
 
 ```bash
-podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-jammy-py3 make micaz sim-sf
+podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-resolute-py3 make micaz sim-sf
 ```
 
 Sources are fetched at fixed versions, checked by SHA-256:
 [tinyos/nesc](https://github.com/tinyos/nesc) at `v1.4.0` (both images), and TinyOS from
 [tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2`
 (`jammy-py2`) or from the `tossim-py3` branch of
-[afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/tossim-py3) (`jammy-py3`):
+[afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/tossim-py3) (`*-py3`):
 the same tag plus one commit, described below. The official repositories are archived
 (read-only).
 
@@ -57,6 +59,19 @@ fixes, with `python-is-python3` for fix 1 and `PYTHON_VERSION=3.10` for fix 7.
 | 6 | `'fclose' undeclared` in `stdio.h` | with GCC ≥ 11, glibc tags `fopen` with `__attr_dealloc(fclose)`, and nesC's generated C declares `fclose` later | compile with **GCC 10** (same apt) |
 | 7 | `Python.h: No such file` | `sim.extra` turns `Python 2.7.18` into `2.78` (its `sed` expects a one-digit patch) | `PYTHON_VERSION=2.7` |
 | 8 | `undefined symbol: __nesc_atomic_end` on import | GCC ≥ 5 defaults to C99 `inline`: a non-static inline function emits no code | `-fgnu89-inline` |
+
+## Ubuntu 26.04: three more fixes
+
+26.04 has GCC 15 and no GCC 10, so fix 6 has to be done another way, and GCC 15's default
+dialect (C23) is new to nesC. Still no TinyOS file is edited.
+
+| # | Symptom | Cause | Fix |
+|---|---|---|---|
+| 9 | building nesC: `incompatible pointer type 'const unsigned int *'` in `libcpp/directives.c` | nesC's libcpp writes `U"string"` meaning its macro `U` = `(const unsigned char *)`; since C11 that is a UTF-32 literal, and GCC 14 made the mismatch an error. (Older GCCs only warned, so those few strings were already UTF-32 in builds with C11 or later defaults.) | build nesC with `CFLAGS="-g -O2 -std=gnu89"`, its dialect |
+| 10 | `` `nullptr' undeclared `` in `stddef.h`, `implicit declaration of function '_Generic'` | GCC 15 defaults to C23: its headers use `nullptr`, glibc 2.43 makes `strrchr` & co. `_Generic` macros, and nesC parses neither. nesC forwards only `-m` options to gcc, so `PFLAGS` cannot set the dialect | a `gcc` wrapper (`resolute-py3/gcc`, installed as `/usr/local/bin/gcc`) adds `-std=gnu17` |
+| 11 | `'fclose' undeclared` in `stdio.h` (fix 6 again) | same cause as fix 6: nesC drops the unused `fclose` declaration but keeps `__attr_dealloc(fclose)` on `fopen` & co. | the same wrapper reports GCC 10 **only** to nesC's predefined-macro query (`gcc -E -dM`), so nesC sees the headers as with GCC 10. The generated C is compiled by GCC 15 |
+
+The `x86_64-linux-gnu-gcc` used by Python extension builds is not affected by the wrapper.
 
 ## Python 3
 
@@ -116,5 +131,5 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 ## Roadmap
 
 1. ~~**Python 3**~~: done in `jammy-py3` (see "Python 3").
-2. **Ubuntu 24.04** (`noble-py3`), now that Python 2 is not needed.
+2. ~~**A current Ubuntu**~~: done in `resolute-py3` (26.04 LTS).
 3. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.
