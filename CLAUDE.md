@@ -51,10 +51,16 @@ ficam as decisões e o modo de trabalhar.
 
 ## Pendências para decidir com o Prof.
 
-- **Inventário da `.ova`** (Ubuntu 12.04 com o ambiente antigo do Prof.): ele tem alterações não
-  testadas, e elas podem estar dentro de `/opt/tinyos-2.1.2` na VM, além do Terra. Comparar a
-  árvore de lá com a tag oficial; diferenças viram os primeiros commits da branch do fork. O
-  7-Zip já está instalado (`7z`) e extrai o disco sem ligar a VM. Pedir o caminho da `.ova`.
+- **Inventário da `.ova`** (feito em 2026-11-21): `TerraNG_v0.3.0.ova` do site do Terra
+  (`www.inf.puc-rio.br/~prjterra/files/Terra/`, 2,34 GB, sem manifesto; SHA-256 do vmdk
+  `3b78039c...`). Ubuntu 12.04.5 **i386**. TinyOS = pacote `tinyos-2.1.2` 2.1.2-20120813, **sem
+  alterações** (difere da tag só por omissões do pacote e 2 arquivos mais antigos: rf212,
+  shimmer). Ferramentas: **nesC 1.3.4**, gcc 4.6.3, avr-gcc 4.1.2 e avrdude 5.10 (pacotes do
+  TinyOS), Python 2.7.3, Oracle Java 7, bc. O Terra na `.ova` é só binário (sem fonte): os
+  `.so` do TerraSim são **idênticos** aos da `.ova` (2016-05-07); os do TerraDist no GitHub não.
+  Fontes do `.so` (DWARF): `CustomVMs/TerraNet|TerraGrp` e `XComps` = hoje
+  `platforms/TinyOS/Net|Grp|common`; `BasicServicesP.nc` e `VMCustomP.nc` mudaram (o código de
+  2016 tem mais linhas). O GitHub do Terra entrou num commit só (2018-03-12).
 
 ## O que já se sabe do build em produção
 
