@@ -37,7 +37,12 @@ ficam as decisões e o modo de trabalhar.
 - Python 3 (2026-11-21, aprovado pelo Prof.): um único commit com os wrappers regerados pelo
   SWIG 4.0.2 e **commitados** (a imagem não precisa de SWIG); o mesmo fonte serve Python 2.7 e 3.
   O módulo passou a `_TOSSIM.so`; `setData`/`data()` usam `bytes` no Python 3. A SDK Python do
-  TinyOS (`support/sdk/python`) continua só Python 2 e não foi portada.
+  TinyOS (`support/sdk/python`) continua só Python 2, exceto `tinyos.message.Message` (base das
+  classes do `mig`), corrigido no fork (`0dca1d8`, aprovado pelo Prof. em 2026-11-21).
+- `mig` (2026-11-21, pedido do Prof. para deixar a parte dele "íntegra"): correções 15 e 16 na
+  imagem + `0dca1d8` no fork; testado por `tests/mig_check.py` (Python, Java e entrega no TOSSIM).
+- Imagem publicada pelo GitHub Actions (`.github/workflows/images.yml`) em
+  `ghcr.io/afbranco/tinyos-toolchain`, só com `ALL PASS`; pública (pull anônimo funciona).
 
 ## Pendências para decidir com o Prof.
 

@@ -145,6 +145,22 @@ podman, also `--group-add keep-groups`. In Blink, `make install` warns that it c
 generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
 mote-only code: `McuSleepC`, the CC1000 radio).
 
+## mig: two more fixes and one TinyOS commit
+
+`mig` generates an app's message classes (Java, Python) from its nesC structs; apps list them
+in `BUILD_EXTRA_DEPS` (RadioCountToLeds: `RadioCountMsg.class`, `RadioCountMsg.py`).
+
+| # | Symptom | Cause | Fix |
+|---|---|---|---|
+| 15 | `javac RadioCountMsg.java`: `package net.tinyos.message does not exist` | the generated Java class needs TinyOS's `tinyos.jar`, which TinyOS's own environment put in `CLASSPATH` | `CLASSPATH=$TOSROOT/support/sdk/java/tinyos.jar:.` in the image |
+| 16 | the Python class's `offset_<field>()` / `size_<field>()` give `2.0`, not `2`, in Python 3 | nesC's generator (`genpython.pm`) writes `(bits / 8)` | `//` instead, in the image (a `sed` on nesC's installed file, checked) |
+| – | the Python class's first `set_<field>()`: `can only concatenate str (not "bytes") to str` | `tinyos.message.Message`, the base class from TinyOS's Python SDK, makes its buffer with `chr(0) * n` (a `str` in Python 3) | fork commit `0dca1d8`: `b"\0" * n` (the same in Python 2) |
+
+With them, the Python class works in Python 3 with `bytes`, like TOSSIM's `Packet.setData()`
+and `data()`, so a message built with it can be delivered to a mote in TOSSIM (see "Tests"). It
+needs `$TOSROOT/support/sdk/python` on `sys.path` (not set in the image, as the rest of that
+SDK is still Python 2 only). `jammy-py2` (frozen) has neither fix.
+
 ## TinyOS changes
 
 All on the [`2.1.2-maintained`](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained)
@@ -154,11 +170,11 @@ branch of afbranco/tinyos-main, on top of `release_tinyos_2_1_2`, one commit per
 |---|---|---|
 | `da2f9d0` | TOSSIM Python 3 bindings (SWIG 4), see "Python 3" | this project |
 | `fc2953f` | AVR progmem consts with newer GCC | upstream `cbbddf66`, cherry-picked (`-x`), author kept |
+| `0dca1d8` | Python SDK `Message`: buffer as `bytes`, for mig's Python classes in Python 3 | this project |
 
 ## Python 3
 
-Python 3 needs new TOSSIM bindings, so this is the one step that changes TinyOS. The change is a
-single commit on top of `release_tinyos_2_1_2`, on the
+Python 3 needs new TOSSIM bindings: a single commit (`da2f9d0`) on top of `release_tinyos_2_1_2`, on the
 [`2.1.2-maintained`](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained) branch of
 afbranco/tinyos-main. The wrappers (`tossim_wrap.cxx`, `TOSSIM.py`, in `tos/lib/tossim` and
 `tos/lib/tossim/sf`) are regenerated with **SWIG 4.0.2** and committed, so the image does not
@@ -175,7 +191,8 @@ What changes for a user of the Python API:
 - **`getVariable()`** returns `int` / `float`, or `bytes` for raw memory; the variable list given
   to `Tossim()` uses `str`.
 - **The TinyOS Python SDK** (`support/sdk/python`: `tinyos.tossim.TossimApp`, `NescApp`, the
-  packet tools) is Python 2 code and is **not** ported; `resolute-py3` does not put it on
+  packet tools) is Python 2 code and is **not** ported, except `tinyos.message.Message`, the base
+  of mig's Python classes (see "mig"); `resolute-py3` does not put it on
   `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
   a hand-written variable list.
 
@@ -207,6 +224,11 @@ apps and runs them:
   time reaches 20 s and mote 2 receives packets.
 - **BaseStation**, `make micaz sim-sf`: boots 2 motes and checks the SerialForwarder handshake
   (`"U "`) on TCP port 9002.
+- **mig** (`tests/mig_check.py`, on the RadioCountToLeds build, which now includes its mig
+  targets; skipped in `jammy-py2`): the Python class sets a 16-bit counter as the bytes `12 34`
+  (`bytes` in Python 3, integer offsets and sizes); the Java class gives the same bytes; and two
+  messages built by the Python class, counters 5 and 2, are delivered to a TOSSIM mote, whose
+  LEDs must show their low 3 bits (on off on, then off on off). Seen to fail without the fixes.
 - **API check** (`tests/api_check.py`, on the RadioCountToLeds build): `getVariable()` through
   the variable list, `setData()`/`data()` with binary bytes, and a file added twice to a
   channel getting each line once. Each check was seen to fail with its part of the binding
@@ -231,8 +253,7 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 ## Not tested yet
 
-- `mig` (message classes for Java/Python) with nesC 1.4.0. The tests skip it with
-  `BUILD_EXTRA_DEPS=`; it is not needed for the TOSSIM `.so`.
+- `mig` for other apps than RadioCountToLeds (struct arrays, strings) and its C output.
 - Real motes, and `make install` with the MIB520 and MIB600 boards (to try on micaz, mica2 and
   mica2dot).
 

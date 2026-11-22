@@ -15,13 +15,19 @@ fail=0
 work=$(mktemp -d)
 cp -a "$TOSROOT/apps/RadioCountToLeds" "$TOSROOT/apps/BaseStation" "$TOSROOT/apps/Blink" "$work/"
 noise="$TOSROOT/tos/lib/tossim/noise/meyer-heavy.txt"
+# mig (message classes) is tested in the Python 3 images; jammy-py2 (frozen) has neither the
+# mig fixes nor tinyos.jar in CLASSPATH, and there the mig targets are skipped as before.
+case "$PYTHON_VERSION" in 2.*) mig=0 ;; *) mig=1 ;; esac
 
 run() {  # run <app> <make target> <test script> [args]
   local app=$1 target=$2 script=$3; shift 3
   echo "== $app: make micaz $target"
-  # BUILD_EXTRA_DEPS= skips mig (message classes): not needed for the .so, and not yet
-  # validated with nesC 1.4.0 (see README, "Not tested yet").
-  if ! (cd "$work/$app" && make micaz "$target" BUILD_EXTRA_DEPS= > "$work/$app.build.log" 2>&1); then
+  # BUILD_EXTRA_DEPS= skips mig (the app's message classes), except for RadioCountToLeds
+  # when the image supports it: mig_check.py tests those classes.
+  local deps=BUILD_EXTRA_DEPS=
+  [ "$app" = RadioCountToLeds ] && [ $mig = 1 ] && deps=
+  # shellcheck disable=SC2086
+  if ! (cd "$work/$app" && make micaz "$target" $deps > "$work/$app.build.log" 2>&1); then
     echo "BUILD FAIL"; tail -20 "$work/$app.build.log"; fail=1; return
   fi
   gen_c_check "$app-$target" "$work/$app/simbuild/micaz/app.c"
@@ -52,6 +58,12 @@ $py --version
 run RadioCountToLeds sim radio_count.py "$noise"
 echo "== RadioCountToLeds: API check"
 [ -f "$work/RadioCountToLeds/TOSSIM.py" ] && (cd "$work/RadioCountToLeds" && $py /tests/api_check.py) || fail=1
+echo "== RadioCountToLeds: mig message classes (Python, Java, delivered in TOSSIM)"
+if [ $mig = 1 ]; then
+  (cd "$work/RadioCountToLeds" && $py /tests/mig_check.py "$noise") || fail=1
+else
+  echo "skipped: Python 2 image (frozen, without the mig fixes)"
+fi
 run BaseStation sim-sf sf_handshake.py
 
 avr() {  # avr <app> <platform>: build for the mote, from a fresh copy of the app

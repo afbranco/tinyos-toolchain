@@ -33,13 +33,20 @@ RUN curl -fsSL -o /tmp/nesc.tar.gz https://codeload.github.com/tinyos/nesc/tar.g
  && cd /tmp/nesc && ./Bootstrap && ./configure --prefix=/usr/local CFLAGS="-g -O2 -std=gnu89" && make && make install \
  && rm -rf /tmp/nesc /tmp/nesc.tar.gz
 
+# Fix 16: mig's Python generator writes the byte offsets and sizes as "(bits / 8)", a float in
+# Python 3 (2.0); "//" gives the integer in Python 2 and 3. Checked: no "/ 8" is left.
+RUN sed -i 's| / 8)| // 8)|' /usr/local/lib/ncc/genpython.pm \
+ && ! grep -q '[^/]/ 8)' /usr/local/lib/ncc/genpython.pm \
+ && [ "$(grep -c ' // 8)' /usr/local/lib/ncc/genpython.pm)" -eq 6 ]
+
 # TinyOS 2.1.2 with the Python 3 TOSSIM bindings, plus the tools the make system needs.
 # Declared here, not at the top: a new fork commit then rebuilds only from this step on.
-# Commit fc2953f of afbranco/tinyos-main, branch 2.1.2-maintained: release_tinyos_2_1_2 + Python 3
-# bindings (da2f9d0) + upstream cbbddf66 (AVR progmem consts with newer gcc).
+# Commit 0dca1d8 of afbranco/tinyos-main, branch 2.1.2-maintained: release_tinyos_2_1_2 + Python 3
+# bindings (da2f9d0) + upstream cbbddf66 (AVR progmem consts with newer gcc) + the Python SDK's
+# Message buffer as bytes (0dca1d8, for mig's Python classes). See README, "TinyOS changes".
 ARG TINYOS_REPO=afbranco/tinyos-main
-ARG TINYOS_COMMIT=fc2953f5debb89ec20ea1162df8ff85304d27e0f
-ARG TINYOS_SHA256=f7125717662a4ffb2ac1c079e3e0cd0a0301f5bd7ef3300154dfaffa9bb2d18d
+ARG TINYOS_COMMIT=0dca1d84d0ab2ae71bc560b219995be798510407
+ARG TINYOS_SHA256=895c7d0dbbbeb8948f67cf4c0aaa821dafc16b1058a09d5ec09287477ec49226
 ENV TOSROOT=/opt/tinyos-2.1.2
 RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/tar.gz/${TINYOS_COMMIT} \
  && echo "${TINYOS_SHA256}  /tmp/tinyos.tar.gz" | sha256sum -c - \
@@ -61,10 +68,13 @@ RUN echo "${AVRORA_SHA256}  /opt/avrora.jar" | sha256sum -c - \
 COPY resolute-py3/gcc resolute-py3/avr-gcc /usr/local/bin/
 
 # Fix 7: sim.extra only parses "Python 2.x" versions, so set it. Fix 5 and fix 8: as in
-# jammy-py2. No PYTHONPATH: the TinyOS Python SDK (support/sdk/python) is Python 2 code.
+# jammy-py2. Fix 15: tinyos.jar in CLASSPATH, as TinyOS's own environment had it, for the
+# classes mig generates (net.tinyos.message). No PYTHONPATH: most of the TinyOS Python SDK
+# (support/sdk/python) is Python 2 code; only tinyos.message.Message, which mig's Python
+# classes use, works in Python 3 (see README, "mig").
 ENV TOSDIR=${TOSROOT}/tos \
     MAKERULES=${TOSROOT}/support/make/Makerules \
-    CLASSPATH=. \
+    CLASSPATH=${TOSROOT}/support/sdk/java/tinyos.jar:. \
     PYTHON_VERSION=3.14 \
     PFLAGS="-fgnu89-inline -D_Float32=float -D_Float64=double -D_Float32x=double -D_Float64x='long double' -D_Float128='long double'"
 
