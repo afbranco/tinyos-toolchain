@@ -56,8 +56,13 @@ ficam as decisões e o modo de trabalhar.
   `3b78039c...`). Ubuntu 12.04.5 **i386**. TinyOS = pacote `tinyos-2.1.2` 2.1.2-20120813, **sem
   alterações** (difere da tag só por omissões do pacote e 2 arquivos mais antigos: rf212,
   shimmer). Ferramentas: **nesC 1.3.4**, gcc 4.6.3, avr-gcc 4.1.2 e avrdude 5.10 (pacotes do
-  TinyOS), Python 2.7.3, Oracle Java 7, bc. O Terra na `.ova` é só binário (sem fonte): os
-  `.so` do TerraSim são **idênticos** aos da `.ova` (2016-05-07); os do TerraDist no GitHub não.
+  TinyOS), Python 2.7.3, Oracle Java 7, bc. Os `.so` do TerraSim são **idênticos** aos da
+  `.ova` (2016-05-07); os do TerraDist no GitHub não. Fonte do Terra na `.ova`: só
+  `/home/terra/Downloads/Terra-master(.zip)`, download do GitHub de **2015-04-21**, com o layout
+  de produção (`CustomVMs`, `XComps`, `VMCustomNet.h`). Pela tabela de linhas (DWARF) do `.so`,
+  o fonte de produção (2016) **não é** nem o de 2015 nem o do GitHub (2018): fica entre os dois
+  (ex.: `TerraVMC.nc` bate com 2018 e não com 2015; `BasicServicesP.nc` e `VMCustomP.nc` (Net)
+  não batem com nenhum). Cópia em scratchpad `ova/x/Terra-master` (scratchpad é temporário).
   Fontes do `.so` (DWARF): `CustomVMs/TerraNet|TerraGrp` e `XComps` = hoje
   `platforms/TinyOS/Net|Grp|common`; `BasicServicesP.nc` e `VMCustomP.nc` mudaram (o código de
   2016 tem mais linhas). O GitHub do Terra entrou num commit só (2018-03-12).
