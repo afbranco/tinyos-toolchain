@@ -49,6 +49,11 @@ ficam as decisões e o modo de trabalhar.
   saída Python/C. Sem teste: `mig` com arrays/strings em Python.
 - Imagem publicada pelo GitHub Actions (`.github/workflows/images.yml`) em
   `ghcr.io/afbranco/tinyos-toolchain`, só com `ALL PASS`; pública (pull anônimo funciona).
+- Releases marcadas (2026-11-22, aprovado pelo Prof., pedido da sessão Terra): tag git + GitHub
+  Release `2.1.2-rN` apontando para uma imagem fixa (`2.1.2-resolute-py3-<commit>` + digest), com
+  o que foi testado nela. **`2.1.2-r1`** = `f42bac7`, digest `sha256:7e21b1b9...`; as notas dizem
+  "teste de laboratório pendente" (atualizar depois do teste do Prof. com a MIB520). Correção
+  sai como `r2`; uma release publicada não muda. O Terra fixa a imagem da release, nunca a móvel.
 
 ## Pendências para decidir com o Prof.
 
