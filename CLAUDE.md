@@ -41,6 +41,11 @@ ficam as decisões e o modo de trabalhar.
   classes do `mig`), corrigido no fork (`0dca1d8`, aprovado pelo Prof. em 2026-11-21).
 - `mig` (2026-11-21, pedido do Prof. para deixar a parte dele "íntegra"): correções 15 e 16 na
   imagem + `0dca1d8` no fork; testado por `tests/mig_check.py` (Python, Java e entrega no TOSSIM).
+- `mig` no Terra (2026-11-21): com o `bc` (correção 17), o TerraVM público compila para micaz
+  na imagem e as 6 classes Java do `mig` saem idênticas às commitadas no Terra (2018). O
+  `libtoscomm` (serial do Java) vem pronto dentro do `tinyos.jar` e carrega; falta testar porta
+  serial real no lab (SerialForwarder Java com a MIB520). Não usam `mig`: TerraSim (nada) e a
+  saída Python/C. Sem teste: `mig` com arrays/strings em Python.
 - Imagem publicada pelo GitHub Actions (`.github/workflows/images.yml`) em
   `ghcr.io/afbranco/tinyos-toolchain`, só com `ALL PASS`; pública (pull anônimo funciona).
 

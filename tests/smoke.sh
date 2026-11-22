@@ -52,6 +52,8 @@ gen_c_check() {  # gen_c_check <reference name> <generated app.c>
 }
 
 gcc --version | head -1
+# Fix 17: Terra's Makefile needs bc (Python 3 images; jammy-py2 is frozen without it).
+if [ $mig = 1 ] && ! command -v bc > /dev/null; then echo "FAIL: bc missing (Terra's Makefile uses it)"; fail=1; fi
 nescc --version | head -1
 $py --version
 
@@ -65,6 +67,12 @@ else
   echo "skipped: Python 2 image (frozen, without the mig fixes)"
 fi
 run BaseStation sim-sf sf_handshake.py
+echo "== BaseStation: Java MsgReader over the SerialForwarder (sf@localhost:9002)"
+if [ $mig = 1 ]; then
+  (cd "$work/BaseStation" && $py /tests/sf_java_check.py) || fail=1
+else
+  echo "skipped: Python 2 image (frozen, without tinyos.jar in CLASSPATH)"
+fi
 
 avr() {  # avr <app> <platform>: build for the mote, from a fresh copy of the app
   local app=$1 plat=$2 dir="$work/avr-$1-$2"

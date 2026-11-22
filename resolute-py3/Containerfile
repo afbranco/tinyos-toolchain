@@ -14,7 +14,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Fix 1 (python-is-python3: the tools' configure looks for `python`), fix 2 (JDK), fix 3
 # (avr-gcc), fix 4 (emacs/bison/flex/gperf for nesC from git). JDK 17, not 21: Avrora (2013)
-# uses java.lang.Compiler, which Java 21 removed.
+# uses java.lang.Compiler, which Java 21 removed. Fix 17: bc, which Terra's Makefile uses for
+# its sizes and node IDs (Ubuntu 12.04 had it by default; without it mig fails on Terra).
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       ca-certificates curl make perl autoconf automake libtool \
       gcc g++ \
@@ -22,6 +23,7 @@ RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       openjdk-17-jdk-headless \
       gcc-avr avr-libc avrdude \
       bison flex gperf emacs-nox \
+      bc \
  && rm -rf /var/lib/apt/lists/*
 
 # Fix 4: nesC 1.4.0 from the official repo. No "make -j": the emacs code generation races.

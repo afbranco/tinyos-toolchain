@@ -145,7 +145,7 @@ podman, also `--group-add keep-groups`. In Blink, `make install` warns that it c
 generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
 mote-only code: `McuSleepC`, the CC1000 radio).
 
-## mig: two more fixes and one TinyOS commit
+## mig: three more fixes and one TinyOS commit
 
 `mig` generates an app's message classes (Java, Python) from its nesC structs; apps list them
 in `BUILD_EXTRA_DEPS` (RadioCountToLeds: `RadioCountMsg.class`, `RadioCountMsg.py`).
@@ -154,12 +154,27 @@ in `BUILD_EXTRA_DEPS` (RadioCountToLeds: `RadioCountMsg.class`, `RadioCountMsg.p
 |---|---|---|---|
 | 15 | `javac RadioCountMsg.java`: `package net.tinyos.message does not exist` | the generated Java class needs TinyOS's `tinyos.jar`, which TinyOS's own environment put in `CLASSPATH` | `CLASSPATH=$TOSROOT/support/sdk/java/tinyos.jar:.` in the image |
 | 16 | the Python class's `offset_<field>()` / `size_<field>()` give `2.0`, not `2`, in Python 3 | nesC's generator (`genpython.pm`) writes `(bits / 8)` | `//` instead, in the image (a `sed` on nesC's installed file, checked) |
+| 17 | Terra's `make micaz ...`: `bc: not found`, then mig `syntax error before ','` in Terra's headers | Terra's Makefile computes node IDs and memory sizes with `bc` (installed by default on the old Ubuntu, not in a container) and passes them as macros, empty without it | `bc` in the image |
 | – | the Python class's first `set_<field>()`: `can only concatenate str (not "bytes") to str` | `tinyos.message.Message`, the base class from TinyOS's Python SDK, makes its buffer with `chr(0) * n` (a `str` in Python 3) | fork commit `0dca1d8`: `b"\0" * n` (the same in Python 2) |
 
 With them, the Python class works in Python 3 with `bytes`, like TOSSIM's `Packet.setData()`
 and `data()`, so a message built with it can be delivered to a mote in TOSSIM (see "Tests"). It
 needs `$TOSROOT/support/sdk/python` on `sys.path` (not set in the image, as the rest of that
 SDK is still Python 2 only). `jammy-py2` (frozen) has neither fix.
+
+**Terra:** with `bc`, Terra's public TerraVM builds for micaz in the image
+(`make micaz VM:GRP TYPE:NOBS QUEUE:SHORT`), and the six Java message classes its Makefile
+generates with mig are **identical, byte for byte**, to the ones committed in the Terra
+repository (made with the old toolchain); they compile against `tinyos.jar`.
+
+**Java and the serial port:** TinyOS's Java tools (SerialForwarder, MsgReader, `MoteIF`) use
+a JNI library, `libtoscomm`, for serial ports. The image does not build it: `tinyos.jar`
+carries a prebuilt copy (`linux_amd64_toscomm.lib`), which the Java SDK extracts and loads
+(it prints "Could not load library 'toscomm'" first, then "Library loaded successfully"); it
+loads with the current glibc. (Building it from `tools/tinyos/java` would fail: it includes
+`<termio.h>`, gone from glibc, but it also includes `<termios.h>`, so that line can go.) A
+real serial port is still to be tried with a mote: a pseudo-terminal cannot stand in, as
+`libtoscomm` asks for the modem lines' status, which a pseudo-terminal does not have.
 
 ## TinyOS changes
 
@@ -229,6 +244,11 @@ apps and runs them:
   (`bytes` in Python 3, integer offsets and sizes); the Java class gives the same bytes; and two
   messages built by the Python class, counters 5 and 2, are delivered to a TOSSIM mote, whose
   LEDs must show their low 3 bits (on off on, then off on off). Seen to fail without the fixes.
+- **Java over the SerialForwarder** (`tests/sf_java_check.py`, on the BaseStation `sim-sf`
+  build; skipped in `jammy-py2`): RadioCountMsg packets delivered over the radio to a
+  BaseStation mote must reach TinyOS's Java `MsgReader`, connected with `-comm sf@localhost:9002`,
+  decoded by the mig Java class (the path of Terra's TerraControl). Seen to fail with the
+  wrong AM type.
 - **API check** (`tests/api_check.py`, on the RadioCountToLeds build): `getVariable()` through
   the variable list, `setData()`/`data()` with binary bytes, and a file added twice to a
   channel getting each line once. Each check was seen to fail with its part of the binding
@@ -255,7 +275,7 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 - `mig` for other apps than RadioCountToLeds (struct arrays, strings) and its C output.
 - Real motes, and `make install` with the MIB520 and MIB600 boards (to try on micaz, mica2 and
-  mica2dot).
+  mica2dot); the Java SerialForwarder on a real serial port (`-comm serial@/dev/ttyUSB1:micaz`).
 
 ## Roadmap
 
