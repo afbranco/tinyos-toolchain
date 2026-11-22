@@ -13,7 +13,7 @@ depends on Terra: the tests use stock TinyOS apps.
 
 - **Supported: TOSSIM** (`make micaz sim` and `make micaz sim-sf`), which is what Terra needs.
   This is what the images build and the tests check.
-- **Time-boxed: AVR motes** (micaz, iris, mica2). `resolute-py3` builds them (fixes 12, 13
+- **Time-boxed: AVR motes** (micaz, iris, mica2, mica2dot). `resolute-py3` builds them (fixes 12, 13
   and one upstream TinyOS commit), and the micaz firmware runs on the
   [Avrora](https://sourceforge.net/projects/avrora/) simulator in the tests. Not yet tried on a
   real mote. It stays only if each fix stays small; otherwise it is dropped and the reason
@@ -24,7 +24,7 @@ depends on Terra: the tests use stock TinyOS apps.
 
 ## Status
 
-| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | `make micaz` / `iris` / `mica2` | |
+| Image tag | Base | Python | `make micaz sim` | `make micaz sim-sf` | `make micaz` / `iris` / `mica2` / `mica2dot` | |
 |---|---|---|---|---|---|---|
 | `2.1.2-resolute-py3` | Ubuntu 26.04, x86_64 | 3.14 | ✅ | ✅ | ✅ (micaz also on Avrora) | **maintained** |
 | `2.1.2-jammy-py2` | Ubuntu 22.04, x86_64 | 2.7 | ✅ | ✅ | | frozen |
@@ -53,7 +53,7 @@ Sources are fetched at fixed versions, checked by SHA-256:
 [tinyos/tinyos-main](https://github.com/tinyos/tinyos-main) at `release_tinyos_2_1_2`
 (`jammy-py2`) or from the `2.1.2-maintained` branch of
 [afbranco/tinyos-main](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained) (`*-py3`):
-the same tag plus one commit, described below. The official repositories are archived
+the same tag plus a few commits, listed in "TinyOS changes". The official repositories are archived
 (read-only).
 
 ## The eight fixes
@@ -87,12 +87,13 @@ dialect (C23) is new to nesC. Still no TinyOS file is edited.
 
 The `x86_64-linux-gnu-gcc` used by Python extension builds is not affected by the wrapper.
 
-## AVR motes: two more fixes and one upstream commit
+## AVR motes: three more fixes and one upstream commit
 
 | # | Symptom | Cause | Fix |
 |---|---|---|---|
 | 12 | `` `ASSR' undeclared ``, `WDT`, `RAMPZ`… (registers missing) | since avr-gcc 5 the driver reads a per-device specs file and gives the compiler (here nesC) `-mmcu=avr51` instead of `-mmcu=atmega128`; nesC reads the predefined macros for that architecture, so `__AVR_ATmega128__` & co. are missing and `<avr/io.h>` selects no device | an `avr-gcc` wrapper (`resolute-py3/avr-gcc`, as `/usr/local/bin/avr-gcc`): for nesC's call only, it passes the macros that `-mmcu=<device>` defines and its architecture does not (for atmega128: `__AVR_ATmega128__`, `__AVR_DEVICE_NAME__`, `__AVR_RODATA_IN_RAM__`) |
 | 13 | `syntax error before 'pgm_read_i24'` in `avr/pgmspace.h` | avr-gcc 14 defines `__INT24_MAX__`, and avr-libc then declares functions on `__int24`, a type nesC does not know | the same wrapper undefines `__INT24_MAX__` for nesC (TinyOS does not use those functions) |
+| 14 | `make micaz install` fails: `uisp: No such file`, and Ubuntu's `uisp` has no `-dprog=mib510` | TinyOS used its own patched `uisp` | `PROGRAMMER=avrdude` in the image's environment: TinyOS's rules pick avrdude (`-cmib510`) |
 | – | `must be const in order to be put into read-only section by means of '__attribute__((progmem))'` | TinyOS 2.1.2's `PROGMEM` typedefs drop `const`, which newer GCCs require | upstream commit [`cbbddf66`](https://github.com/tinyos/tinyos-main/commit/cbbddf66ee8acbbc87fe316e7077cc1144968d88) (2014), cherry-picked into the fork |
 
 The image also has **Avrora** 1.7.117 (2013, BSD, vendored in `third_party/avrora`; `avrora`
@@ -103,6 +104,29 @@ and mica2, run on **JDK 17**: Avrora uses `java.lang.Compiler`, which Java 21 re
 avrora -platform=micaz -input=elf -seconds=4 -monitors=leds build/micaz/main.exe
 avrora -simulation=sensor-network -platform=micaz -input=elf -nodecount=2 -seconds=3 -monitors=packet build/micaz/main.exe
 ```
+
+### Programming a mote
+
+TinyOS 2.1.2 programs micaz, mica2 and mica2dot with `uisp`, but a version patched and shipped
+by TinyOS: Ubuntu's `uisp` (20050207) has neither the MIB510/MIB520 nor the MIB600 support. The
+image has **avrdude** 7.1 instead and sets `PROGRAMMER=avrdude` (fix 14): TinyOS's make rules
+already have its options for every AVR platform, and iris used it by default. The container sees the programming board
+only if it is passed in. Examples, node ID 1:
+
+```bash
+# MIB520 (USB): it shows two serial ports; programming uses the first one.
+podman run --rm -it --device /dev/ttyUSB0 -v ./myapp:/work:Z \
+  tinyos-toolchain:2.1.2-resolute-py3 make micaz install,1 mib520,/dev/ttyUSB0
+
+# MIB510 (serial, or through a USB-serial adapter): same, with mib510,<port>.
+# MIB600 (Ethernet, "eprb" in TinyOS): no --device, just the board's address.
+podman run --rm -it -v ./myapp:/work:Z \
+  tinyos-toolchain:2.1.2-resolute-py3 make micaz install,1 eprb,<board address>
+```
+
+On the host, the user needs access to the port (on Ubuntu: the `dialout` group); with rootless
+podman, also `--group-add keep-groups`. In Blink, `make install` warns that it could not find
+`TOS_NODE_ID`: Blink does not use the ID, so the compiler removed it, as with the old toolchain.
 
 `cbbddf66` also edits `tos/chips/atm128/sim/atm128const.h`, which TOSSIM includes: the
 generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
@@ -182,7 +206,7 @@ apps and runs them:
   references match in both images: the official TinyOS (`jammy-py2`, GCC 10) and the
   `2.1.2-maintained` fork with GCC 15 (`resolute-py3`) generate the same code. After an intended
   change, regenerate the references with `GEN_C_UPDATE=<writable dir>` and commit them with it.
-- **AVR** (`resolute-py3` only): Blink and RadioCountToLeds built for micaz, iris and mica2,
+- **AVR** (`resolute-py3` only): Blink and RadioCountToLeds built for micaz, iris, mica2 and mica2dot,
   each with its generated-C reference. Then, on Avrora (`tests/avrora_check.py`): Blink on a
   micaz for 4 s, whose three LEDs must toggle exactly every 1800000, 3600000 and 7200000
   cycles (250, 500 and 1000 TinyOS ms at 7.3728 MHz); and RadioCountToLeds on 2 micaz for
@@ -196,7 +220,8 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 
 - `mig` (message classes for Java/Python) with nesC 1.4.0. The tests skip it with
   `BUILD_EXTRA_DEPS=`; it is not needed for the TOSSIM `.so`.
-- Mote targets (real hardware): see "Scope".
+- Real motes, and `make install` with the MIB520 and MIB600 boards (to try on micaz, mica2 and
+  mica2dot).
 
 ## Roadmap
 

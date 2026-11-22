@@ -4,7 +4,7 @@
 # Builds two stock TinyOS apps for TOSSIM and runs a short simulation of each, plus an API
 # check of the Python binding. Uses python$PYTHON_VERSION (set by the image: 2.7 or 3.x).
 # In images with AVR support (/usr/local/bin/avr-gcc), it also builds Blink and RadioCountToLeds
-# for micaz, iris and mica2, and runs the micaz builds on the Avrora simulator (Blink's LED
+# for micaz, iris, mica2 and mica2dot, and runs the micaz builds on the Avrora simulator (Blink's LED
 # periods; RadioCountToLeds on 2 nodes, packets received) when the image has `avrora`.
 # Each build's generated C (app.c, normalized by gen_c_norm.awk: TinyOS and app code only)
 # must match tests/ref/<app>-<target>.txt. To regenerate the references after an intended
@@ -68,7 +68,15 @@ avr() {  # avr <app> <platform>: build for the mote, from a fresh copy of the ap
 if [ -x /usr/local/bin/avr-gcc ]; then
   avr-gcc --version | head -1
   for app in Blink RadioCountToLeds; do
-    for plat in micaz iris mica2; do avr "$app" "$plat"; done
+    for plat in micaz iris mica2 mica2dot; do avr "$app" "$plat"; done
+  done
+  # make install's programmer call (dry run, make -n: no board here): avrdude with the MIB520
+  # (USB) and the MIB600 (Ethernet, "eprb").
+  echo "== make install: programmer command (dry run)"
+  for prog in mib520,/dev/ttyUSB0 eprb,192.0.2.1; do
+    cmd=$(cd "$work/avr-Blink-micaz" && make -n micaz reinstall,1 "$prog" 2>&1 | grep -E '^(avrdude|uisp) ')
+    echo "  $prog: ${cmd:-(none)}" | cut -c1-110
+    case "$cmd" in avrdude\ -cmib510\ *) ;; *) echo "FAIL: $prog should program with avrdude -cmib510"; fail=1 ;; esac
   done
   if command -v avrora > /dev/null; then
     echo "== Blink micaz on Avrora: 4 s"

@@ -60,7 +60,10 @@ AVR (2026-11-21): Blink e RadioCountToLeds compilam para micaz, iris e mica2 na 
 (correções 12 e 13 no invólucro `resolute-py3/avr-gcc` + `cbbddf66` do oficial no fork), e o
 micaz roda no **Avrora** 1.7.117 dentro do `smoke.sh` (JDK 17: o Avrora não roda no 21). O jar
 fica em `third_party/avrora` (decisão do Prof., 2026-11-21: os espelhos do SourceForge falham).
-Falta: mote real (o Prof. testa na semana de 2026-11-23).
+Também mica2dot (compila sem correção nova). Gravação: `avrdude` com `PROGRAMMER=avrdude`
+(correção 14: o `uisp` do Ubuntu não é o modificado pelo TinyOS). O Prof. tem no lab micaz,
+mica2, mica2dot e telosb (este fora do escopo), placa MIB520 (USB) e talvez uma MIB600
+(ethernet). Falta: mote real (o Prof. testa na semana de 2026-11-23).
 
 64 bits: a varredura de avisos do GCC nos builds TOSSIM não acha conversão ponteiro/inteiro.
 O Prof. lembrava de um problema de 64 bits identificado na VM do Terra, numa sessão TerraSim

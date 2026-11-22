@@ -20,7 +20,7 @@ RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       gcc g++ \
       python3 python3-dev python-is-python3 \
       openjdk-17-jdk-headless \
-      gcc-avr avr-libc \
+      gcc-avr avr-libc avrdude \
       bison flex gperf emacs-nox \
  && rm -rf /var/lib/apt/lists/*
 
@@ -67,5 +67,10 @@ ENV TOSDIR=${TOSROOT}/tos \
     CLASSPATH=. \
     PYTHON_VERSION=3.14 \
     PFLAGS="-fgnu89-inline -D_Float32=float -D_Float64=double -D_Float32x=double -D_Float64x='long double' -D_Float128='long double'"
+
+# Fix 14: TinyOS 2.1.2 programs micaz, mica2 and mica2dot with uisp, as patched and shipped by
+# TinyOS (MIB510/520 and MIB600 support); Ubuntu's uisp is the plain one, without them. avrdude
+# supports both boards, and TinyOS's make rules have its options for every AVR platform.
+ENV PROGRAMMER=avrdude
 
 WORKDIR /work
