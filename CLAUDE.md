@@ -63,9 +63,15 @@ ficam as decisões e o modo de trabalhar.
   o fonte de produção (2016) **não é** nem o de 2015 nem o do GitHub (2018): fica entre os dois
   (ex.: `TerraVMC.nc` bate com 2018 e não com 2015; `BasicServicesP.nc` e `VMCustomP.nc` (Net)
   não batem com nenhum). Cópia em scratchpad `ova/x/Terra-master` (scratchpad é temporário).
-  Fontes do `.so` (DWARF): `CustomVMs/TerraNet|TerraGrp` e `XComps` = hoje
-  `platforms/TinyOS/Net|Grp|common`; `BasicServicesP.nc` e `VMCustomP.nc` mudaram (o código de
-  2016 tem mais linhas). O GitHub do Terra entrou num commit só (2018-03-12).
+  **Versão base do `.so` de produção** (2026-11-21, pela tabela de linhas do DWARF, histórico
+  completo do `afbranco/Terra`: 430 commits, 2014-06 a 2018-03; um clone raso tinha enganado):
+  o fonte bate com o commit **`f02b8e6`** (2016-05-26, "Adaptação inicial para o Arduino Uno"):
+  0 linhas além do fim e só 6-7 linhas sem código (o mesmo artefato do compilador visto no
+  TinyOS), contra 80-90 no commit anterior (`b53382a`). O `BSUpload.nc` exclui o `74b669c` em
+  diante. O `.so` é de 05-07: compilado com alterações locais commitadas em 05-26. Limite: edição
+  na mesma linha não aparece; prova definitiva = recompilar `f02b8e6` com o toolchain da `.ova`.
+  Depois do `f02b8e6`: 321 commits (37 na VM TinyOS) = as "inovações" a avaliar com o Prof.
+  Layout de 2016 (`CustomVMs`, `XComps`) virou `platforms/TinyOS/*` em 2016-10-07.
 
 ## O que já se sabe do build em produção
 
