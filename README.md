@@ -37,6 +37,19 @@ once `resolute-py3` passed, and is in the git history.)
 
 ## Quick start
 
+Published images (built and tested by GitHub Actions on every push to `main`, see
+`.github/workflows/images.yml`):
+
+```bash
+podman pull ghcr.io/afbranco/tinyos-toolchain:2.1.2-resolute-py3          # latest build
+podman pull ghcr.io/afbranco/tinyos-toolchain:2.1.2-resolute-py3-<commit> # one exact build
+```
+
+A tag is published only if `tests/smoke.sh` gives `ALL PASS` in that image. Projects that
+must not change under them (Terra's releases) should use the `-<commit>` tag.
+
+Or build locally:
+
 ```bash
 podman build -t tinyos-toolchain:2.1.2-resolute-py3 -f resolute-py3/Containerfile .
 podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-resolute-py3 bash /tests/smoke.sh
@@ -45,7 +58,7 @@ podman run --rm -v ./tests:/tests:ro,Z tinyos-toolchain:2.1.2-resolute-py3 bash 
 Building an app of your own:
 
 ```bash
-podman run --rm -it -v ./myapp:/work:Z tinyos-toolchain:2.1.2-resolute-py3 make micaz sim-sf
+podman run --rm -it -v ./myapp:/work:Z ghcr.io/afbranco/tinyos-toolchain:2.1.2-resolute-py3 make micaz sim-sf
 ```
 
 Sources are fetched at fixed versions, checked by SHA-256:

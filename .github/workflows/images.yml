@@ -1,0 +1,59 @@
+# Builds the toolchain image, runs tests/smoke.sh in it and, on main, publishes it to
+# ghcr.io/afbranco/tinyos-toolchain only if the tests pass (ALL PASS).
+# - push to main: resolute-py3 (the maintained image), tags 2.1.2-resolute-py3 (moves) and
+#   2.1.2-resolute-py3-<commit> (fixed, to pin an exact build).
+# - pull request: build and test, no publishing.
+# - manual run (workflow_dispatch): choose the image; the only way to rebuild the frozen
+#   jammy-py2, as a rebuild takes newer apt packages and so changes it.
+name: images
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Image to build, test and publish
+        type: choice
+        options: [resolute-py3, jammy-py2]
+        default: resolute-py3
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      VARIANT: ${{ inputs.variant || 'resolute-py3' }}
+      IMAGE: ghcr.io/${{ github.repository_owner }}/tinyos-toolchain
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          podman build -t "tinyos-toolchain:2.1.2-$VARIANT" -f "$VARIANT/Containerfile" \
+            --label org.opencontainers.image.source="https://github.com/${{ github.repository }}" \
+            --label org.opencontainers.image.revision="${{ github.sha }}" \
+            --label org.opencontainers.image.licenses=BSD-3-Clause \
+            --label org.opencontainers.image.description="TinyOS 2.1.2 + TOSSIM ($VARIANT)" \
+            .
+
+      - name: Smoke test
+        run: |
+          podman run --rm -v ./tests:/tests:ro,Z "tinyos-toolchain:2.1.2-$VARIANT" bash /tests/smoke.sh \
+            | tee smoke.log
+          tail -1 smoke.log | grep -qx "ALL PASS"
+
+      - name: Publish
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u "${{ github.actor }}" --password-stdin
+          sha=$(echo "${{ github.sha }}" | cut -c1-7)
+          for tag in "2.1.2-$VARIANT" "2.1.2-$VARIANT-$sha"; do
+            podman push "tinyos-toolchain:2.1.2-$VARIANT" "$IMAGE:$tag"
+            echo "published $IMAGE:$tag"
+          done
