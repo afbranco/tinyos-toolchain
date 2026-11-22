@@ -12,7 +12,8 @@ ficam as decisões e o modo de trabalhar.
   mexer no TinyOS enquanto der. **Meta declarada pelo Prof.: chegar ao Python 3.**
 - Três projetos em cadeia, cada um consumindo o anterior como artefato pronto:
   1. **tinyos-toolchain** (este): só o toolchain, sem nada de Terra.
-  2. **Terra** (`afbranco/Terra`): compila a VM dentro desta imagem e publica releases do
+  2. **Terra** (`afbranco/Terra`, clone em `~/Terra` com `CLAUDE.md` próprio, criado em
+     2026-11-21 para a sessão Terra): compila a VM dentro desta imagem e publica releases do
      `_TOSSIMmodule.so`. Expectativa do Prof.: o Terra não precisará de adaptação. Atenção: no
      Python 3 o módulo se chama `_TOSSIM.so`, então quem publica ou copia o `.so` muda o nome.
   3. **TerraSim** (`~/TerraSim`): troca o `.so` vendorizado por uma release do Terra, depois de
