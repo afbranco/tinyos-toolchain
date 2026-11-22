@@ -176,6 +176,41 @@ loads with the current glibc. (Building it from `tools/tinyos/java` would fail: 
 real serial port is still to be tried with a mote: a pseudo-terminal cannot stand in, as
 `libtoscomm` asks for the modem lines' status, which a pseudo-terminal does not have.
 
+## TinyOS's Python tools: one more fix and one TinyOS commit
+
+The image's `python` is Python 3. Seven TinyOS tools were Python 2 code and failed there:
+
+| Tool | Used for | On Python 3, before |
+|---|---|---|
+| `tos-storage-at45db` | flash volumes of the mica family (micaz, mica2, mica2dot, iris): `StorageVolumes.h` | `SyntaxError` on every build of an app with a `volumes-at45db.xml` (Block/Log/ConfigStorage, Deluge). The make rule's `\|\| rm -f` hid it: nesC then stops on the missing `StorageVolumes.h` |
+| `tos-storage-stm25p`, `tos-storage-pxa27xp30` | the same for telosb and intelmote2 (platforms out of scope) | the same `SyntaxError` |
+| `tos-deluge`, `tos-build-deluge-image` | Deluge, over-the-air reprogramming | `SyntaxError`; `reduce` and `bytes` errors |
+| `tos-dump.py` | prints the packets a mote sends over serial | `SyntaxError` (and `TabError`) |
+| `tos.py` (Python SDK) | the serial protocol under `tos-deluge` and `tos-dump.py` | `SyntaxError` |
+
+Terra uses flash volumes only in its optional `MOD=VCN_DAT` module (`VolcanoDataC`), which
+did not build; its default builds were not affected.
+
+Fork commits `9b530d6` and `5feb228` turn them into code that runs on Python 3 and still on Python 2.7,
+with the same behaviour:
+
+- **The same flash layout.** `tos-storage-at45db` placed the volumes in the order Python 2
+  iterates a dict, and Python 3 iterates in another order: 10 of the 12 files in `apps/` with
+  several volumes got other addresses (the Deluge volumes among them), so a mote or an image
+  built before would not agree with a new one on where each volume is. The script now places
+  them in the Python 2 order, computed from Python 2's string hash and dict table
+  (`py2_dict_order()`, checked against Python 2.7 on 20000 random sets of names).
+- **Checked against the originals on Python 2.7**, same output byte for byte: the three
+  `tos-storage` scripts on the 49 `volumes-*.xml` files in `apps/` and on 12 invalid inputs;
+  `tos-build-deluge-image` on a real image; `tos-deluge` (every command, an image inject
+  included) and `tos-dump.py` against a fake Deluge base station, comparing every frame the
+  mote received.
+- `tos-storage-pxa27xp30` had an indentation error and never ran, also on Python 2: fixed.
+
+| # | Symptom | Cause | Fix |
+|---|---|---|---|
+| 18 | `tos-deluge`, `tos-dump.py`: `Please install PySerial first.` | the Python SDK's `tos` module needs pySerial (also in `jammy-py2`: these tools never ran in either image) | `python3-serial` in the image |
+
 ## TinyOS changes
 
 All on the [`2.1.2-maintained`](https://github.com/afbranco/tinyos-main/tree/2.1.2-maintained)
@@ -186,6 +221,8 @@ branch of afbranco/tinyos-main, on top of `release_tinyos_2_1_2`, one commit per
 | `da2f9d0` | TOSSIM Python 3 bindings (SWIG 4), see "Python 3" | this project |
 | `fc2953f` | AVR progmem consts with newer GCC | upstream `cbbddf66`, cherry-picked (`-x`), author kept |
 | `0dca1d8` | Python SDK `Message`: buffer as `bytes`, for mig's Python classes in Python 3 | this project |
+| `9b530d6` | `tos-storage-*`, `tos-deluge`, `tos-dump.py`, `tos-build-deluge-image` and the SDK's `tos.py` on Python 3, same flash layout as on Python 2 (see "TinyOS's Python tools") | this project |
+| `5feb228` | `tos-deluge`: find `tos` through `os.environ` (Python 3's `posix.environ` has `bytes` keys) | this project |
 
 ## Python 3
 
@@ -207,8 +244,8 @@ What changes for a user of the Python API:
   to `Tossim()` uses `str`.
 - **The TinyOS Python SDK** (`support/sdk/python`: `tinyos.tossim.TossimApp`, `NescApp`, the
   packet tools) is Python 2 code and is **not** ported, except `tinyos.message.Message`, the base
-  of mig's Python classes (see "mig"); `resolute-py3` does not put it on
-  `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
+  of mig's Python classes (see "mig"), and the `tos` module of the Deluge tools (see "TinyOS's
+  Python tools"); `resolute-py3` does not put it on `PYTHONPATH`. TOSSIM itself does not need it: `Tossim([])` works, and so does `Tossim()` with
   a hand-written variable list.
 
 ## 64-bit hosts
@@ -267,6 +304,14 @@ apps and runs them:
   cycles (250, 500 and 1000 TinyOS ms at 7.3728 MHz); and RadioCountToLeds on 2 micaz for
   3 s, each receiving at least 5 packets with no corrupted byte. Both checks were seen to
   fail with Blink's timer at 251 ms and with RadioCountToLeds not sending.
+- **Flash volumes and Deluge tools** (`resolute-py3`): `tos-storage-at45db` and
+  `tos-storage-stm25p` on three files with several volumes must give the output of the
+  original scripts on Python 2.7 (`tests/ref/storage`: the same flash layout);
+  `apps/tests/deluge/Blink` (4 volumes) builds for micaz, with its generated-C reference; and
+  `tests/deluge_check.py` turns that build into a Deluge image (`tos-build-deluge-image`),
+  reads its ident back with `tos-deluge -p` over TCP from a fake base station
+  (`tests/fakemote.py`), and reads the packets of a fake mote with `tos-dump.py` over a serial
+  port (a pseudo-terminal, through pySerial). All seen to fail on the `2.1.2-r1` image.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit
 build. Equivalence needs a trace comparison against the original toolchain (see Roadmap).
@@ -274,6 +319,8 @@ build. Equivalence needs a trace comparison against the original toolchain (see 
 ## Not tested yet
 
 - `mig` for other apps than RadioCountToLeds (struct arrays, strings) and its C output.
+- Deluge on real motes (inject and over-the-air reprogramming), and `tos-deluge` /
+  `tos-dump.py` on a real serial port.
 - Real motes, and `make install` with the MIB520 and MIB600 boards (to try on micaz, mica2 and
   mica2dot); the Java SerialForwarder on a real serial port (`-comm serial@/dev/ttyUSB1:micaz`).
 

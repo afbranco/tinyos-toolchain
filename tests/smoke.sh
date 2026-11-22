@@ -6,6 +6,8 @@
 # In images with AVR support (/usr/local/bin/avr-gcc), it also builds Blink and RadioCountToLeds
 # for micaz, iris, mica2 and mica2dot, and runs the micaz builds on the Avrora simulator (Blink's LED
 # periods; RadioCountToLeds on 2 nodes, packets received) when the image has `avrora`.
+# Also there: the flash volume scripts (tos-storage-*), a Deluge app build and the Deluge tools
+# with the Python SDK's tos module (deluge_check.py).
 # Each build's generated C (app.c, normalized by gen_c_norm.awk: TinyOS and app code only)
 # must match tests/ref/<app>-<target>.txt. To regenerate the references after an intended
 # change, mount a writable dir and set GEN_C_UPDATE to it.
@@ -34,9 +36,12 @@ run() {  # run <app> <make target> <test script> [args]
   (cd "$work/$app" && $py "/tests/$script" "$@") || fail=1
 }
 
-gen_c_check() {  # gen_c_check <reference name> <generated app.c>
-  local norm="$work/$1.txt" ref="/tests/ref/$1.txt"
-  awk -v tosroot="$TOSROOT" -f /tests/gen_c_norm.awk "$2" > "$norm"
+gen_c_check() {  # gen_c_check <reference name> <generated app.c> [build log]
+  local norm="$work/$1.txt" ref="/tests/ref/$1.txt" uid=""
+  # The build's random IDENT_UIDHASH (compiled in by Deluge apps), from the compiler's command
+  # line in the build log.
+  [ -n "${3:-}" ] && uid=$(grep -o 'IDENT_UIDHASH=0x[0-9a-fA-F]*L' "$3" | head -1 | cut -d= -f2)
+  awk -v tosroot="$TOSROOT" -v uidhash="$uid" -f /tests/gen_c_norm.awk "$2" > "$norm"
   if [ -n "${GEN_C_UPDATE:-}" ]; then
     cp "$norm" "$GEN_C_UPDATE/" && echo "generated C: reference written to $GEN_C_UPDATE"
   elif diff -q "$ref" "$norm" > /dev/null; then
@@ -74,15 +79,16 @@ else
   echo "skipped: Python 2 image (frozen, without tinyos.jar in CLASSPATH)"
 fi
 
-avr() {  # avr <app> <platform>: build for the mote, from a fresh copy of the app
-  local app=$1 plat=$2 dir="$work/avr-$1-$2"
+avr() {  # avr <app under apps/> <platform>: build for the mote, from a fresh copy of the app
+  local app=$1 plat=$2 name="${1//\//_}-$2"
+  local dir="$work/avr-$name"
   echo "== $app: make $plat"
   cp -a "$TOSROOT/apps/$app" "$dir"
   if ! (cd "$dir" && make "$plat" BUILD_EXTRA_DEPS= > build.log 2>&1); then
     echo "BUILD FAIL"; grep -v '^ ' "$dir/build.log" | tail -15; fail=1; return
   fi
   grep -E 'bytes in (ROM|RAM)' "$dir/build.log" | tr -s ' ' | tr '\n' ' '; echo
-  gen_c_check "$app-$plat" "$dir/build/$plat/app.c"
+  gen_c_check "$name" "$dir/build/$plat/app.c" "$dir/build.log"
 }
 
 if [ -x /usr/local/bin/avr-gcc ]; then
@@ -90,6 +96,23 @@ if [ -x /usr/local/bin/avr-gcc ]; then
   for app in Blink RadioCountToLeds; do
     for plat in micaz iris mica2 mica2dot; do avr "$app" "$plat"; done
   done
+  # Flash volumes (fork commits 9b530d6, 5feb228): tos-storage-* run on Python 3 and keep the flash layout
+  # of Python 2. tests/ref/storage holds the original scripts' output on Python 2.7.
+  echo "== Flash volumes: tos-storage-at45db and -stm25p, layout as on Python 2"
+  for x in tests/deluge/GoldenImage:at45db:micaz UDPEcho:at45db:micaz tests/deluge/GoldenImage:stm25p:telosb; do
+    IFS=: read -r app chip plat <<< "$x"
+    ref="/tests/ref/storage/${app//\//_}-$chip.h"
+    if (cd "$TOSROOT/apps/$app" && tos-storage-$chip "$TOSROOT/tos/platforms/$plat" < "volumes-$chip.xml" 2>&1) \
+        | diff -q "$ref" - > /dev/null; then
+      echo "  same as tests/ref: $app ($chip)"
+    else
+      echo "  FAIL: $app ($chip) differs from $ref"; fail=1
+    fi
+  done
+  # An app with flash volumes (Deluge: 4 volumes): its build runs tos-storage-at45db.
+  avr tests/deluge/Blink micaz
+  echo "== Deluge tools and the Python SDK's tos module (network@ and serial@)"
+  (cd "$work/avr-tests_deluge_Blink-micaz" && $py /tests/deluge_check.py) || fail=1
   # make install's programmer call (dry run, make -n: no board here): avrdude with the MIB520
   # (USB) and the MIB600 (Ethernet, "eprb").
   echo "== make install: programmer command (dry run)"

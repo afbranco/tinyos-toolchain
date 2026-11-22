@@ -54,6 +54,14 @@ ficam as decisões e o modo de trabalhar.
   o que foi testado nela. **`2.1.2-r1`** = `f42bac7`, digest `sha256:7e21b1b9...`; as notas dizem
   "teste de laboratório pendente" (atualizar depois do teste do Prof. com a MIB520). Correção
   sai como `r2`; uma release publicada não muda. O Terra fixa a imagem da release, nunca a móvel.
+- Scripts Python 2 do TinyOS (2026-11-22, achado pela sessão Terra, aprovado pelo Prof.: "os
+  cinco"): `tos-storage-at45db/-stm25p/-pxa27xp30`, `tos-deluge`, `tos-dump.py`, mais o
+  `tos-build-deluge-image` e o `tos.py` da SDK (necessários para os outros funcionarem), portados
+  no fork (`9b530d6`, mais `5feb228`: `posix.environ` do `tos-deluge`, achado pelo smoke), compatíveis com Python 2 e 3. Correção 18: `python3-serial`. Decisão
+  técnica: o `tos-storage-at45db` aloca os volumes na **ordem de dicionário do Python 2**
+  (`py2_dict_order()`), senão o layout da flash muda (Deluge). Equivalência conferida contra os
+  originais no Python 2.7 da `jammy-py2` (local), com um mote falso (`tests/fakemote.py`). O
+  Terra só usa volumes no módulo opcional `MOD=VCN_DAT`. Candidato a `2.1.2-r2`.
 
 ## Pendências para decidir com o Prof.
 

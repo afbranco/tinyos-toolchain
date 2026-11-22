@@ -16,6 +16,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # (avr-gcc), fix 4 (emacs/bison/flex/gperf for nesC from git). JDK 17, not 21: Avrora (2013)
 # uses java.lang.Compiler, which Java 21 removed. Fix 17: bc, which Terra's Makefile uses for
 # its sizes and node IDs (Ubuntu 12.04 had it by default; without it mig fails on Terra).
+# Fix 18: python3-serial (pySerial), which the Python SDK's tos module needs for serial@ (it
+# exits at import without it); tos-deluge and tos-dump.py use that module.
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       ca-certificates curl make perl autoconf automake libtool \
       gcc g++ \
@@ -24,6 +26,7 @@ RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       gcc-avr avr-libc avrdude \
       bison flex gperf emacs-nox \
       bc \
+      python3-serial \
  && rm -rf /var/lib/apt/lists/*
 
 # Fix 4: nesC 1.4.0 from the official repo. No "make -j": the emacs code generation races.
@@ -43,12 +46,14 @@ RUN sed -i 's| / 8)| // 8)|' /usr/local/lib/ncc/genpython.pm \
 
 # TinyOS 2.1.2 with the Python 3 TOSSIM bindings, plus the tools the make system needs.
 # Declared here, not at the top: a new fork commit then rebuilds only from this step on.
-# Commit 0dca1d8 of afbranco/tinyos-main, branch 2.1.2-maintained: release_tinyos_2_1_2 + Python 3
+# Commit 5feb228 of afbranco/tinyos-main, branch 2.1.2-maintained: release_tinyos_2_1_2 + Python 3
 # bindings (da2f9d0) + upstream cbbddf66 (AVR progmem consts with newer gcc) + the Python SDK's
-# Message buffer as bytes (0dca1d8, for mig's Python classes). See README, "TinyOS changes".
+# Message buffer as bytes (0dca1d8, for mig's Python classes) + tos-storage-*, tos-deluge,
+# tos-dump.py, tos-build-deluge-image and tos.py on Python 3 (9b530d6, 5feb228). See README,
+# "TinyOS changes".
 ARG TINYOS_REPO=afbranco/tinyos-main
-ARG TINYOS_COMMIT=0dca1d84d0ab2ae71bc560b219995be798510407
-ARG TINYOS_SHA256=895c7d0dbbbeb8948f67cf4c0aaa821dafc16b1058a09d5ec09287477ec49226
+ARG TINYOS_COMMIT=5feb2288992bfc448a3a042097d19707f1d22f10
+ARG TINYOS_SHA256=e148f32e81c9ebf6f158a251f8836dce2237efb9c054c3aa04d3ba4dc747b574
 ENV TOSROOT=/opt/tinyos-2.1.2
 RUN curl -fsSL -o /tmp/tinyos.tar.gz https://codeload.github.com/${TINYOS_REPO}/tar.gz/${TINYOS_COMMIT} \
  && echo "${TINYOS_SHA256}  /tmp/tinyos.tar.gz" | sha256sum -c - \
