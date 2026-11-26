@@ -121,6 +121,31 @@ if [ -x /usr/local/bin/avr-gcc ]; then
     echo "  $prog: ${cmd:-(none)}" | cut -c1-110
     case "$cmd" in avrdude\ -cmib510\ *) ;; *) echo "FAIL: $prog should program with avrdude -cmib510"; fail=1 ;; esac
   done
+  # Apps that build their Java tool with mig -target=null (fix 19: nesC on the system headers,
+  # without PFLAGS) and javac -target 1.4 (fix 20): TestSerial (mig, javac 1.4, make micaz) and
+  # Oscilloscope's java/ (mig and ncg -target=null).
+  echo "== mig/ncg -target=null and javac 1.4: TestSerial (micaz), Oscilloscope/java"
+  cp -a "$TOSROOT/apps/tests/TestSerial" "$work/TestSerial"
+  cp -a "$TOSROOT/apps/Oscilloscope" "$work/Oscilloscope"
+  for x in TestSerial:"make micaz":TestSerial.class Oscilloscope/java:make:oscilloscope.jar; do
+    IFS=: read -r d cmd out <<< "$x"
+    # shellcheck disable=SC2086
+    if (cd "$work/$d" && $cmd > build.log 2>&1) && [ -f "$work/$d/$out" ]; then
+      echo "  ok: $d ($out)"
+    else
+      echo "  FAIL: $d"; grep -v '^ ' "$work/$d/build.log" | tail -6; fail=1
+    fi
+  done
+  # TestPrintf (fork 29a43b6, upstream a2d2c126): printf needs SerialStartC to start the serial
+  # port; without it the mote prints nothing (seen on a micaz with a MIB520).
+  echo "== TestPrintf (micaz): starts the serial port"
+  cp -a "$TOSROOT/apps/tests/TestPrintf" "$work/TestPrintf"
+  if (cd "$work/TestPrintf" && make micaz > build.log 2>&1) \
+      && grep -q 'SerialStartP__Boot__booted' "$work/TestPrintf/build/micaz/app.c"; then
+    echo "  ok: SerialStartC wired"
+  else
+    echo "  FAIL: TestPrintf does not build, or does not start the serial port"; fail=1
+  fi
   if command -v avrora > /dev/null; then
     echo "== Blink micaz on Avrora: 4 s"
     avrora -platform=micaz -input=elf -seconds=4 -monitors=leds -colors=false \

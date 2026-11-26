@@ -61,7 +61,15 @@ ficam as decisões e o modo de trabalhar.
   técnica: o `tos-storage-at45db` aloca os volumes na **ordem de dicionário do Python 2**
   (`py2_dict_order()`), senão o layout da flash muda (Deluge). Equivalência conferida contra os
   originais no Python 2.7 da `jammy-py2` (local), com um mote falso (`tests/fakemote.py`). O
-  Terra só usa volumes no módulo opcional `MOD=VCN_DAT`. Candidato a `2.1.2-r2`.
+  Terra só usa volumes no módulo opcional `MOD=VCN_DAT`. Publicado como **`2.1.2-r2`**
+  (`21d8fb1`, digest `sha256:4198b123...`).
+- Teste de laboratório (2026-11-26, imagem `r2`, 2 micaz em 2 MIB520CA; o Prof. viu os LEDs):
+  gravação com `avrdude -cmib510`, rádio, serial nos dois sentidos com Python (`tos.py`,
+  `tos-dump.py`, classe do `mig`) e Java (`Listen`, `TestSerial`, `PrintfClient`): passou
+  (README, "Lab test"). Achou as correções 19 (`mig -target=null` sem as definições `_Float*`)
+  e 20 (`javac -target 1.4`) e o `a2d2c126` do oficial (TestPrintf sem `SerialStartC`), no fork
+  como `29a43b6`: os três aprovados pelo Prof. para a **`2.1.2-r3`**, junto com a atualização
+  do "Lab test pending" das notas r1 e r2. Deluge fora do teste (decisão do Prof.).
 
 ## Pendências para decidir com o Prof.
 
@@ -117,6 +125,10 @@ todos i386. Origem do diagnóstico em aberto (perguntar ao Prof. onde ele viu). 
 - **Testar antes de publicar**: `tests/smoke.sh` dentro da imagem tem de dar `ALL PASS`. Ele
   inclui o teste do C gerado (`tests/ref/`): é o mapa de impacto de qualquer mudança no fork ou
   na toolchain. Mudança intencional: regerar as referências e commitar junto, explicando.
+- **Painel de status**: ao concluir uma tarefa que muda o estado do projeto (release, teste,
+  decisão), e antes de encerrar, atualizar o painel em `STATUS.md` (fora do git, em
+  `.git/info/exclude`, porque o repositório é público). Criado pela sessão `~/admin` em
+  2026-11-23: na primeira abertura, conferir o conteúdo.
 - `PFLAGS` vai pelo **ambiente**, nunca na linha de comando do `make`: na linha de comando ele
   anula o `PFLAGS +=` do `sim.extra` e o build deixa de ser de simulação.
 - **Teste novo só vale depois de reprovar com a mudança desfeita** (mutar o teste).

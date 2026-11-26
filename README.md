@@ -15,8 +15,8 @@ depends on Terra: the tests use stock TinyOS apps.
   This is what the images build and the tests check.
 - **Time-boxed: AVR motes** (micaz, iris, mica2, mica2dot). `resolute-py3` builds them (fixes 12, 13
   and one upstream TinyOS commit), and the micaz firmware runs on the
-  [Avrora](https://sourceforge.net/projects/avrora/) simulator in the tests. Not yet tried on a
-  real mote. It stays only if each fix stays small; otherwise it is dropped and the reason
+  [Avrora](https://sourceforge.net/projects/avrora/) simulator in the tests. Tried on real
+  micaz motes with MIB520 boards (see "Lab test"). It stays only if each fix stays small; otherwise it is dropped and the reason
   written here.
 - **Out of scope:** the other TinyOS 2.1.2 platforms (MSP430, ARM, XScale, M16C). Their old
   compilers are gone (for MSP430, TI's current `msp430-elf` GCC is not compatible with the
@@ -145,7 +145,7 @@ podman, also `--group-add keep-groups`. In Blink, `make install` warns that it c
 generated-C test shows no change in the TOSSIM builds (those typedefs are only used by
 mote-only code: `McuSleepC`, the CC1000 radio).
 
-## mig: three more fixes and one TinyOS commit
+## mig: five more fixes and one TinyOS commit
 
 `mig` generates an app's message classes (Java, Python) from its nesC structs; apps list them
 in `BUILD_EXTRA_DEPS` (RadioCountToLeds: `RadioCountMsg.class`, `RadioCountMsg.py`).
@@ -155,12 +155,15 @@ in `BUILD_EXTRA_DEPS` (RadioCountToLeds: `RadioCountMsg.class`, `RadioCountMsg.p
 | 15 | `javac RadioCountMsg.java`: `package net.tinyos.message does not exist` | the generated Java class needs TinyOS's `tinyos.jar`, which TinyOS's own environment put in `CLASSPATH` | `CLASSPATH=$TOSROOT/support/sdk/java/tinyos.jar:.` in the image |
 | 16 | the Python class's `offset_<field>()` / `size_<field>()` give `2.0`, not `2`, in Python 3 | nesC's generator (`genpython.pm`) writes `(bits / 8)` | `//` instead, in the image (a `sed` on nesC's installed file, checked) |
 | 17 | Terra's `make micaz ...`: `bc: not found`, then mig `syntax error before ','` in Terra's headers | Terra's Makefile computes node IDs and memory sizes with `bc` (installed by default on the old Ubuntu, not in a container) and passes them as macros, empty without it | `bc` in the image |
+| 19 | `mig -target=null` (TestSerial, Oscilloscope, MViz, AntiTheft, MultihopOscilloscope...): `syntax error before '__value'` in `mathcalls-helper-functions.h`, `failed to parse message file` | fix 5 again: nesC does not know glibc's `_Float32` & co., and `PFLAGS` maps them only in make's `ncc` calls; mig and ncg do not get `PFLAGS` (`-target=micaz` reads avr-libc's headers instead, which have no such types) | the `gcc` wrapper adds the same mappings to nesC's predefined-macro query (`gcc -E -dM`, as fix 11), which every nesC run reads |
+| 20 | `javac -target 1.4 -source 1.4` (TestSerial, NxFloat, TestDip): `Source option 1.4 is no longer supported. Use 7 or later.` | JDK 17 compiles from Java 7 on; those Makefiles date from Java 1.4 | a `javac` wrapper (`resolute-py3/javac`) raises a `-source`, `-target` or `--release` older than 7 to 8 |
 | – | the Python class's first `set_<field>()`: `can only concatenate str (not "bytes") to str` | `tinyos.message.Message`, the base class from TinyOS's Python SDK, makes its buffer with `chr(0) * n` (a `str` in Python 3) | fork commit `0dca1d8`: `b"\0" * n` (the same in Python 2) |
 
 With them, the Python class works in Python 3 with `bytes`, like TOSSIM's `Packet.setData()`
 and `data()`, so a message built with it can be delivered to a mote in TOSSIM (see "Tests"). It
 needs `$TOSROOT/support/sdk/python` on `sys.path` (not set in the image, as the rest of that
-SDK is still Python 2 only). `jammy-py2` (frozen) has neither fix.
+SDK is still Python 2 only). `jammy-py2` (frozen) has none of these fixes: there fixes 19 and 20
+are open too (checked: the same mig error, and JDK 11 refuses Java 1.4).
 
 **Terra:** with `bc`, Terra's public TerraVM builds for micaz in the image
 (`make micaz VM:GRP TYPE:NOBS QUEUE:SHORT`), and the six Java message classes its Makefile
@@ -171,9 +174,9 @@ repository (made with the old toolchain); they compile against `tinyos.jar`.
 a JNI library, `libtoscomm`, for serial ports. The image does not build it: `tinyos.jar`
 carries a prebuilt copy (`linux_amd64_toscomm.lib`), which the Java SDK extracts and loads
 (it prints "Could not load library 'toscomm'" first, then "Library loaded successfully"); it
-loads with the current glibc. (Building it from `tools/tinyos/java` would fail: it includes
-`<termio.h>`, gone from glibc, but it also includes `<termios.h>`, so that line can go.) A
-real serial port is still to be tried with a mote: a pseudo-terminal cannot stand in, as
+loads with the current glibc, and works on a real serial port (see "Lab test"). (Building it
+from `tools/tinyos/java` would fail: it includes `<termio.h>`, gone from glibc, but it also
+includes `<termios.h>`, so that line can go.) The tests cannot use a pseudo-terminal for it, as
 `libtoscomm` asks for the modem lines' status, which a pseudo-terminal does not have.
 
 ## TinyOS's Python tools: one more fix and one TinyOS commit
@@ -223,6 +226,7 @@ branch of afbranco/tinyos-main, on top of `release_tinyos_2_1_2`, one commit per
 | `0dca1d8` | Python SDK `Message`: buffer as `bytes`, for mig's Python classes in Python 3 | this project |
 | `9b530d6` | `tos-storage-*`, `tos-deluge`, `tos-dump.py`, `tos-build-deluge-image` and the SDK's `tos.py` on Python 3, same flash layout as on Python 2 (see "TinyOS's Python tools") | this project |
 | `5feb228` | `tos-deluge`: find `tos` through `os.environ` (Python 3's `posix.environ` has `bytes` keys) | this project |
+| `29a43b6` | `apps/tests/TestPrintf` wires `SerialStartC`: since 2.1.2, `PrintfC` no longer starts the serial port, and the test app printed nothing (seen on a micaz) | upstream `a2d2c126`, cherry-picked (`-x`), author kept |
 
 ## Python 3
 
@@ -312,21 +316,42 @@ apps and runs them:
   reads its ident back with `tos-deluge -p` over TCP from a fake base station
   (`tests/fakemote.py`), and reads the packets of a fake mote with `tos-dump.py` over a serial
   port (a pseudo-terminal, through pySerial). All seen to fail on the `2.1.2-r1` image.
+- **Apps' Java tools and TestPrintf** (`resolute-py3`): `apps/tests/TestSerial` builds for
+  micaz with its Java tool (mig `-target=null`, `javac -target 1.4`), and so does
+  `apps/Oscilloscope/java` (mig and ncg `-target=null`); `apps/tests/TestPrintf` builds for micaz
+  with `SerialStartC` wired in the generated C. Seen to fail on the `2.1.2-r2` image.
 
 A smoke test proves the build works, not that it **simulates the same** as the old 32-bit
 build. Equivalence needs a trace comparison against the original toolchain (see Roadmap).
 
+## Lab test
+
+On 2026-11-26, with the `2.1.2-r2` image, on two micaz motes in two MIB520CA boards (USB), with
+stock TinyOS apps (Terra was tried the same day, see its repository):
+
+| Test | Result |
+|---|---|
+| `make micaz reinstall,N mib510,/dev/ttyUSB0` (avrdude `-cmib510`), every app below | flash written and verified, fuses verified |
+| RadioCountToLeds on both motes (radio) | both count on their LEDs |
+| BaseStation + RadioCountToLeds, mote to PC (`serial@/dev/ttyUSB1:57600`) | `tos-dump.py`, a Python reader with the mig class (`tos.py`, pySerial: 10 counters in a row, in order) and Java `net.tinyos.tools.Listen` (`libtoscomm`) all read the packets |
+| BaseStation, PC to mote: RadioCountMsg written with `tos.py` | the other mote's LEDs show each counter sent |
+| TestSerial and its Java tool (serial both ways) | 17 packets sent, 18 received, in sequence |
+| TestPrintf, read with `tos-dump.py` and Java `PrintfClient` | prints nothing on `2.1.2-r2` (fork commit `29a43b6` fixes it); with `SerialStartC`, its 8-, 16- and 32-bit values right in both |
+
+It found fixes 19 and 20 and commit `29a43b6` (in `2.1.2-r3`). Two things that are TinyOS's
+own behaviour: `tos.py`'s `AM.write()` takes a list as the **whole** packet (header included),
+so a payload has to be a `tos.Packet`; and `tos-dump.py` prints each printf packet (28 bytes)
+on its own line, cutting lines (the Java `PrintfClient` does not).
+
 ## Not tested yet
 
 - `mig` for other apps than RadioCountToLeds (struct arrays, strings) and its C output.
-- Deluge on real motes (inject and over-the-air reprogramming), and `tos-deluge` /
-  `tos-dump.py` on a real serial port.
-- Real motes, and `make install` with the MIB520 and MIB600 boards (to try on micaz, mica2 and
-  mica2dot); the Java SerialForwarder on a real serial port (`-comm serial@/dev/ttyUSB1:micaz`).
+- Deluge on real motes (inject and over-the-air reprogramming).
+- mica2, mica2dot and iris motes, and the MIB600 board (Ethernet).
 
 ## Roadmap
 
 1. ~~**Python 3**~~: done (see "Python 3").
 2. ~~**A current Ubuntu**~~: done in `resolute-py3` (26.04 LTS).
-3. ~~**AVR motes**~~: build and Avrora (see "Scope"); a real mote is still to be tried.
+3. ~~**AVR motes**~~: build, Avrora and real micaz motes (see "Scope", "Lab test").
 4. **Equivalence oracle**: same program, same seed, old toolchain vs new, identical event traces.

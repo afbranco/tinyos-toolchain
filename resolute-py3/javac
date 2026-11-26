@@ -1,0 +1,16 @@
+#!/bin/sh
+# Installed as /usr/local/bin/javac, ahead of /usr/bin/javac (JDK 17) in PATH. See README.md,
+# fix 20: some TinyOS Makefiles (apps/tests/TestSerial, NxFloat, TestDip) compile their Java
+# tool with "javac -target 1.4 -source 1.4", which JDK 17 refuses (its oldest is 7, with a
+# warning). Raise a -source, -target or --release older than 7 to 8; pass the rest unchanged.
+n=$#
+prev=
+while [ $n -gt 0 ]; do
+  a=$1; shift; n=$((n - 1))
+  case "$prev" in
+    -source|-target|--release) case "$a" in 1.[0-6]|[1-6]) a=8 ;; esac ;;
+  esac
+  set -- "$@" "$a"
+  prev=$a
+done
+exec /usr/bin/javac "$@"
