@@ -68,8 +68,12 @@ ficam as decisões e o modo de trabalhar.
   `tos-dump.py`, classe do `mig`) e Java (`Listen`, `TestSerial`, `PrintfClient`): passou
   (README, "Lab test"). Achou as correções 19 (`mig -target=null` sem as definições `_Float*`)
   e 20 (`javac -target 1.4`) e o `a2d2c126` do oficial (TestPrintf sem `SerialStartC`), no fork
-  como `29a43b6`: os três aprovados pelo Prof. para a **`2.1.2-r3`**, junto com a atualização
-  do "Lab test pending" das notas r1 e r2. Deluge fora do teste (decisão do Prof.).
+  como `29a43b6`: os três aprovados pelo Prof. e publicados como **`2.1.2-r3`** (`0dded15`,
+  imagem `2.1.2-resolute-py3-0dded15`, digest `sha256:e3da1ef0...`); notas r1 e r2 atualizadas
+  com o resultado (a imagem delas não muda). Correção 19 no wrapper `gcc` (consulta `-dM`),
+  20 num wrapper `javac`. A `jammy-py2` (congelada) tem os mesmos dois defeitos e fica sem eles.
+  Na r3 vieram também atualizações de segurança do Ubuntu (binutils do host, krb5...); nesC,
+  `tos/` e `support/` iguais à r2. Deluge fora do teste (decisão do Prof.).
 
 ## Pendências para decidir com o Prof.
 
